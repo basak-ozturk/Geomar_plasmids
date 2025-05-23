@@ -1,0 +1,265 @@
+---
+title: "How to predict sex of penguins"
+format: 
+  docx:
+    reference-doc:  F:/Aktenschrank/Analysen/R/Rtemplate1.docx
+editor: visual
+execute: 
+  echo: false
+  warning: false
+  output: asis
+fig-dpi: 300
+fig-width: 6
+fig-height: 8
+tbl-cap-location: top
+---
+
+```{r setupstuff}
+pacman::p_load(conflicted,tidyverse,wrappedtools,broom,car,
+               palmerpenguins, rlist, flextable,
+               patchwork, ggbeeswarm, ggsignif, 
+               rpart, rpart.plot, pROC)
+conflicts_prefer(dplyr::filter, dplyr::select)
+set_flextable_defaults(big.mark = " ", 
+                       font.size = 9, 
+                       theme_fun = theme_vanilla,
+                       padding.bottom = 1, 
+                       padding.top = 3,
+                       padding.left = 3,
+                       padding.right = 4,
+                       font.family = "xkcd Script"
+)
+theme_set(theme_bw())
+theme_update(
+  plot.title=element_text(family="xkcd Script"),
+  plot.caption=element_text(family="xkcd Script"),
+  axis.title=element_text(family="xkcd Script"),
+  axis.text=element_text(family="xkcd Script"),
+  strip.text=element_text(family="xkcd Script"))
+```
+
+```{r dataprep}
+rawdata <- penguins |>
+  drop_na() |> 
+  mutate(year=factor(year))
+```
+
+# GLM
+
+```{r}
+rawdata <- mutate(rawdata,
+                  body_weight_hg=body_mass_g/100,
+                  body_weight_kg=body_mass_g/1000,
+                  species=fct_rev(species))
+ggplot(rawdata,aes(body_weight_kg,fill=sex))+
+  geom_histogram()+
+  facet_grid(rows = vars(species))+
+  scale_x_continuous(breaks=seq(0,10,.5))
+ggplot(rawdata,aes(body_weight_kg,fill=sex))+
+  geom_histogram(position="fill")+
+  scale_y_continuous(labels=scales::percent)+
+  scale_x_continuous(breaks=seq(0,10,.5))+
+  facet_grid(rows = vars(species))
+ggplot(rawdata,aes(bill_depth_mm,fill=sex))+
+  geom_histogram(position="fill")+
+  scale_y_continuous(labels=scales::percent)+
+  facet_grid(rows = vars(species))
+glmformula <- paste('sex',
+                    paste(cn()[c(1,3:5,9)],
+                          collapse="+"),
+                    sep="~") |> 
+  as.formula()
+logreg_out<-glm(glmformula,
+                family=binomial(), data=rawdata)
+logreg_out
+(Anova_out <- Anova(logreg_out,type = 2) |>
+    broom::tidy() |>
+    mutate(p.value=formatP(p.value,ndigits = 5)))
+(sum_out <- summary(logreg_out))
+(ORs <- exp(logreg_out$coefficients))
+(CIs <- exp(confint(logreg_out)))
+
+#neu
+OR_plotdata <- tibble(
+  Predictor=names(ORs)[-1] |> 
+    str_replace_all(
+      c("species"="","island"="",#"_"=" ",
+        "(.+)_(.+)_(.+)"="\\1\\2 [\\3]")) |> 
+    fct_inorder(),
+  OR=ORs[-1],
+  CI_low=CIs[-1,1],
+  CI_high=CIs[-1,2],
+  p=sum_out$coefficients[-1,4],
+  Significance=markSign(p),
+  Label=paste(Predictor,Significance) |> 
+    fct_inorder()) |> 
+  rowwise() |> 
+  mutate(plot_or=paste(roundR(OR),"(",
+                       roundR(CI_low),
+                       "/",roundR(CI_high),")")) |> 
+  ungroup()
+baseplot <- ggplot(OR_plotdata,
+                   aes(x = Label,y=OR))+
+  geom_pointrange(aes(ymin=CI_low,
+                      ymax=CI_high))+
+  coord_flip()+
+  geom_hline(yintercept = 1,
+             linewidth=.2,linetype=2)
+# baseplot
+baseplot+
+  geom_label(aes(label=plot_or), vjust=1.5,color='red')+
+  scale_y_log10(
+    breaks=logrange_15,
+    minor_breaks=logrange_123456789,
+    guide = guide_axis(n.dodge=2),
+    labels=prettyNum)+
+  # geom_text(aes(label=Significance),
+  #           vjust=1.5,color='red')+
+  ggtitle('OddsRatios shown on log-scale')+
+  xlab(NULL)
+
+rawdata$pGLM <- predict(logreg_out,
+                        type = 'response')
+
+
+#pROC
+roc_out <- roc(
+  response=rawdata$sex,
+  predictor=rawdata$pGLM
+)
+youden <- pROC::coords(roc_out,x='best',best.method='youden')
+youden
+rawdata <- 
+  mutate(rawdata,
+         sex_predicted= 
+           case_when(
+             pGLM<youden$threshold ~ "female",
+             pGLM>=youden$threshold ~ "male"))
+table(rawdata$sex, rawdata$sex_predicted)
+rawdata |> 
+  group_by(sex,sex_predicted) |> 
+  count()
+ggroc(roc_out,legacy.axes = T)+
+  geom_abline(slope = 1,intercept = 0)+
+  geom_point(x=1-youden$specificity,
+             y=youden$sensitivity,
+             color='red',
+             size=2
+  )
+
+rawdata |> 
+  mutate(`prediction quality`=
+           case_when(sex=="male" &
+                       pGLM<youden$threshold ~ 
+                       "false negative",
+                     sex=="female" & 
+                       pGLM>=youden$threshold 
+                     ~ "false positive", 
+                     .default = 'correct' )) |>
+  ggplot(aes(sex,pGLM))+
+  geom_boxplot(outlier.alpha = 0)+
+  scale_y_continuous(breaks=seq(0,1,.1))+
+  geom_beeswarm(alpha=.75, 
+                aes(color=`prediction quality`))+ 
+  scale_color_manual(values=c("seagreen","firebrick","magenta"))+ 
+  geom_hline(yintercept = c(youden$threshold,
+                            .5),
+             color='red',
+             linetype=2:3)
+
+glm(sex~species*body_mass_g,family = binomial(), data=rawdata) |>
+  Anova(type = 3)
+```
+
+## Regression tree as alternative to glm
+
+```{r}
+cn() 
+predvars <- ColSeeker(namepattern =c( "_.+_","sp"),
+                      exclude="_.g$")
+rtformula <- paste("sex~",
+                   paste(predvars$bticked,collapse = "+"))
+regtree_out<-rpart(rtformula, #glmformula, 
+                   minsplit=10,cp=.001, 
+                   data=rawdata) 
+rpart.plot(regtree_out,type = 2,tweak=1.25,
+           varlen=8,faclen=5,leaf.round=0)
+
+importance <- 
+  as_tibble(regtree_out$variable.importance,
+            rownames='Predictor')  |>
+  dplyr::rename('Importance'=2)  |>  
+  mutate(Predictor=fct_reorder(.f = Predictor, 
+                               .x = Importance,
+                               .fun = min))  |> 
+  arrange(desc(Importance)) 
+importance |>
+  ggplot(aes(Predictor,Importance))+ 
+  geom_col()+ 
+  coord_flip()
+```
+
+```{r}
+rawdata$pRT <- predict(regtree_out)[,2]
+
+#pROC 
+roc_out_rt <- roc(response=rawdata$sex,
+  predictor=rawdata$pRT ) 
+youden_RT <- pROC::coords(roc_out_rt,x='best',
+                       best.method='youden') 
+youden_RT 
+ggroc(roc_out_rt,legacy.axes = T)+ 
+  geom_abline(slope = 1,intercept = 0)+ 
+  geom_point(x=1-youden_RT$specificity,
+             y=youden_RT$sensitivity, color='red', size=2 )
+
+ggroc(list(RTbased=roc_out_rt,GLM_based=roc_out),legacy.axes = T)+ 
+  geom_abline(slope = 1,intercept = 0)
+
+ggplot(rawdata,aes(x=sex,y=pRT))+ 
+  geom_boxplot(coef=3)+ 
+  scale_y_continuous(breaks = seq(from = 0,to = 1,by = .1))+ 
+  geom_hline(yintercept = c(.5,youden_RT$threshold), 
+             color=c('red',"blue"), linetype=2)+ 
+  ggbeeswarm::geom_beeswarm(cex=.5, alpha=.2) 
+ggplot(rawdata,aes(pGLM,pRT, color=sex,shape=sex))+ 
+  geom_point(size=2)+ 
+  scale_color_manual(values = c('darkgreen','red'))+ 
+  scale_shape_manual(values = c(0,6))#+ 
+  # stat_summary(fun.data=mean_cl_boot) 
+ggplot(rawdata,aes(x=sex,y=pRT))+ 
+  geom_violin()+ 
+  scale_y_continuous(breaks = seq(from = 0,to = 1,by = .1))+ 
+  geom_hline(yintercept = .5,color='red')
+```
+
+## Jackknife
+
+```{r}
+rawdata$pRT_JK <- NA_real_
+rawdata$pGLM_JK <- NA_real_ 
+for(pat_i in 1: nrow(rawdata)){ 
+  tempdata <- rawdata[-pat_i,]
+  regtree_out_tmp<-rpart(rtformula, 
+                         minsplit=5,
+                         cp=.001, data=tempdata) 
+  rawdata$pRT_JK[pat_i] <- 
+    predict(regtree_out_tmp,
+            newdata = rawdata[pat_i,])[,2]
+
+  glm_out_tmp<-glm(rtformula,
+                   family = binomial(), data=tempdata) 
+  rawdata$pGLM_JK[pat_i] <- 
+    predict(glm_out_tmp,newdata = rawdata[pat_i,],
+             type="response") 
+  } 
+ggplot(rawdata,aes(sex,pRT_JK))+ 
+  geom_boxplot() 
+rawdata |> 
+  dplyr::select(sex,pGLM,pGLM_JK, pRT_JK, pRT) |>
+  pivot_longer(cols = c(pGLM,pGLM_JK, pRT_JK,pRT), 
+               names_to = 'Analysis', 
+               values_to = 'pAffected') |>
+  ggplot(aes(sex,pAffected,fill=Analysis))+ 
+  geom_boxplot(outlier.alpha=.5) 
+```
