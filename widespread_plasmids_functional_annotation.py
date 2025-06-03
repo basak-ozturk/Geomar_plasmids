@@ -93,36 +93,36 @@ cog_counts.columns = ["COG", "Count"]
 
 # Map to functional names
 cog_function_map = {
-    "J": "Translation",
-    "A": "RNA processing and modification",
-    "K": "Transcription",
-    "L": "Replication and repair",
-    "B": "Chromatin structure and dynamics",
-    "D": "Cell cycle control",
-    "Y": "Nuclear structure",
-    "V": "Defense mechanisms",
-    "T": "Signal transduction",
-    "M": "Cell wall/membrane biogenesis",
-    "N": "Cell motility",
+    "J": "Translation (J)",
+    "A": "RNA processing and modification (A)",
+    "K": "Transcription (K)",
+    "L": "Replication, recombination and repair (L)",
+    "B": "Chromatin structure and dynamics (B)",
+    "D": "Cell cycle control (D)",
+    "Y": "Nuclear structure (Y)",
+    "V": "Defense mechanisms (V)",
+    "T": "Signal transduction (T)",
+    "M": "Cell wall/membrane biogenesis (M)",
+    "N": "Cell motility (N)",
     #"Z": "Cytoskeleton",
     #"W": "Extracellular structures",
-    "U": "Intracellular trafficking",
-    "O": "Posttranslational modification",
-    "C": "Energy production",
-    "G": "Carbohydrate metabolism",
-    "E": "Amino acid metabolism",
-    "F": "Nucleotide metabolism",
-    "H": "Coenzyme metabolism",
-    "I": "Lipid metabolism",
-    "P": "Inorganic ion transport",
-    "Q": "Secondary metabolites biosynthesis",
-    "R": "General function prediction",
+    "U": "Intracellular trafficking (U)",
+    "O": "Posttranslational modification (O)",
+    "C": "Energy production (C)",
+    "G": "Carbohydrate metabolism (G)",
+    "E": "Amino acid metabolism (E)",
+    "F": "Nucleotide metabolism (F)",
+    "H": "Coenzyme metabolism (H)",
+    "I": "Lipid metabolism (I)",
+    "P": "Inorganic ion transport (P)",
+    "Q": "Secondary metabolites biosynthesis (Q)",
+    "R": "General function prediction (R)",
 }
 
 cog_counts["Function"] = cog_counts["COG"].map(cog_function_map)
 
 # Plot
-import seaborn as sns
+
 plt.figure(figsize=(10, 8))
 sns.barplot(data=cog_counts, y="Function", x="Count", color="skyblue")
 plt.xlabel("Number of Proteins")
