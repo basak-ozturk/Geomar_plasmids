@@ -4,9 +4,9 @@ import seaborn as sns
 from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
 from scipy.spatial.distance import pdist
 import matplotlib.patches as mpatches
-from matplotlib.colors import ListedColormap, Normalize
+#from matplotlib.colors import ListedColormap, Normalize
 import numpy as np
-import matplotlib.colors as mcolors
+#import matplotlib.colors as mcolors
 
 # Load data
 df = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/KEGG_pathway_per_plasmid_with_names.txt", sep="\t", header=None, names=["Plasmid", "Pathway"])
