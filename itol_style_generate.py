@@ -70,7 +70,6 @@ with open("C:/Users/hayat/Downloads/R_files/data/itol_host_symbols.txt", "w") as
 
 
 
-# Build integrase colorstrip
 # Build plasmid length bar plot
 with open("C:/Users/hayat/Downloads/R_files/data/itol_plasmid_length.txt", "w") as f:
     f.write("DATASET_SIMPLEBAR\n")
@@ -80,8 +79,11 @@ with open("C:/Users/hayat/Downloads/R_files/data/itol_plasmid_length.txt", "w") 
     f.write("WIDTH\t25\n")
     f.write("BORDER_WIDTH\t1\n")
     f.write("BORDER_COLOR\t#000000\n")
+    f.write("LEGEND_TITLE\tPlasmid Length (bp)\n")
+    f.write("LEGEND_SHAPES\t1\n")
+    f.write("LEGEND_COLORS\t#808080\n")
+    f.write("LEGEND_LABELS\tLength in base pairs\n")
     f.write("DATA\n")
+
     for _, row in df.iterrows():
         f.write(f"{row['Plasmid']}\t{row['Sequence_Length']}\n")
-
-

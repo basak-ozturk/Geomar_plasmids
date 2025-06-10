@@ -569,3 +569,25 @@ g.ax_heatmap.set_ylabel("Plasmid", fontsize=12)
 
 #g.savefig("C:/Users/hayat/Downloads/R_files/graphs/top_279_abundant_widespread_relative_presence_clustermap.png", dpi=300)
 plt.show()
+
+# Map metagenomes (columns) to their sponge genus
+metagenome_to_genus = host_info.set_index("Run")["biome_genus"].to_dict()
+
+# Create a mapping from genus to list of metagenomes
+from collections import defaultdict
+genus_to_metagenomes = defaultdict(list)
+for metagenome, genus in metagenome_to_genus.items():
+    if genus:  # Skip NaN or None
+        genus_to_metagenomes[genus].append(metagenome)
+
+# Create a new DataFrame: rows = plasmids, columns = sponge genera
+plasmid_vs_genus = pd.DataFrame(0, index=plasmid_presence.index, columns=genus_to_metagenomes.keys())
+
+# Fill in the matrix: if a plasmid is present in any metagenome of a genus, mark 1
+for genus, metagenomes in genus_to_metagenomes.items():
+    valid_metagenomes = [m for m in metagenomes if m in plasmid_presence.columns]
+    genus_presence = (plasmid_presence[valid_metagenomes].sum(axis=1) > 0).astype(int)
+    plasmid_vs_genus[genus] = genus_presence
+
+# Save to CSV
+#plasmid_vs_genus.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmids_vs_sponge_genera.csv")
