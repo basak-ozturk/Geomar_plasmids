@@ -6,6 +6,9 @@ from statsmodels.stats.multitest import multipletests
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 # Load list of plasmids
 with open("C:/Users/hayat/Downloads/R_files/data/widespread_10_more_hosts_list.txt") as f:
     plasmids = set(line.strip() for line in f if line.strip())
@@ -135,3 +138,58 @@ exploratory_filtered = enrichment_df[
 ]
 
 print(f"Terms passing relaxed thresholds: {len(exploratory_filtered)}")
+
+# Filter for significant terms
+significant_filtered = enrichment_df[
+    (enrichment_df["P_Value_Adjusted"] < significance_threshold) &
+    (enrichment_df["Odds_Ratio"] > odds_ratio_threshold)
+]
+
+# Print the significant terms and their statistics
+print("\nSignificant Enriched Terms:")
+for index, row in significant_filtered.iterrows():
+    print(f"  PFAMs: {row['PFAMs']}")
+    print(f"    Adjusted P-value: {row['P_Value_Adjusted']:.3e}")
+    print(f"    Odds Ratio: {row['Odds_Ratio']:.3f}")
+    print(f"    Foreground Count: {row['Foreground_Count']}")
+    print(f"    Background Count: {row['Background_Count']}")
+    print("-" * 40)
+    
+# Set up the figure and axes
+plt.figure(figsize=(10, 6))
+sns.set(style="whitegrid")
+
+# Sort the DataFrame by Odds Ratio for better visualization
+significant_filtered_sorted = significant_filtered.sort_values(
+    "Odds_Ratio", ascending=False
+)
+
+# Create the bar plot
+barplot = sns.barplot(
+    x="Odds_Ratio",
+    y="PFAMs",
+    data=significant_filtered_sorted,
+    palette="viridis",
+)
+
+# Add labels and title
+plt.xlabel("Odds Ratio", fontsize=12)
+plt.ylabel("PFAM Domain", fontsize=12)
+plt.title("Odds Ratio of Significant PFAM Domains", fontsize=14)
+
+# Add annotations (values) to the bars
+for p in barplot.patches:
+    width = p.get_width()
+    plt.text(
+        5,
+        p.get_y() + p.get_height() / 2,
+        f"{width:.1f}",
+        ha="left",
+        va="center",
+        fontsize=10,
+        color="black",
+    )
+
+# Show the plot
+plt.tight_layout()
+plt.show()

@@ -37,7 +37,7 @@ def unify_kegg_id(kegg_id):
 # --- Load data ---
 
 # Load plasmid list
-with open("C:/Users/hayat/Downloads/R_files/data/widespread_10_more_hosts_list.txt") as f:
+with open("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmid_names.csv") as f:
     plasmids = set(line.strip() for line in f if line.strip())
 
 # Find header line in eggNOG annotations
@@ -169,3 +169,10 @@ for p in barplot.patches:
 
 plt.tight_layout()
 plt.show()
+
+# Save filtered significant enrichment results
+significant_filtered.to_csv(
+    "C:/Users/hayat/Downloads/R_files/data/enriched_KEGG_Pathways_all_widespread_significant.tsv",
+    sep="\t",
+    index=False
+)

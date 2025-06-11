@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jun 11 10:45:33 2025
+
+@author: hayat
+"""
+
 import pandas as pd
 from scipy.stats import fisher_exact
 from statsmodels.stats.multitest import multipletests
-#import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load list of plasmids
-with open("C:/Users/hayat/Downloads/R_files/data/widespread_10_more_hosts_list.txt") as f:
+with open("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmid_names.csv") as f:
     plasmids = set(line.strip() for line in f if line.strip())
 
 # Find header line in eggNOG annotations
@@ -35,16 +41,44 @@ background = eggnog_df[~eggnog_df["Plasmid"].isin(plasmids)].copy()
 foreground = foreground[foreground["PFAMs"] != "-"]
 background = background[background["PFAMs"] != "-"]
 
-# Count PFAM occurrences
-fg_counts = foreground["PFAMs"].value_counts()
-bg_counts = background["PFAMs"].value_counts()
+# Split multi-PFAM annotations into lists
+foreground['PFAMs_list'] = foreground['PFAMs'].str.split(',')
+background['PFAMs_list'] = background['PFAMs'].str.split(',')
 
-# All unique PFAMs
+# Explode lists so each PFAM has its own row
+foreground_exp = foreground.explode('PFAMs_list')
+background_exp = background.explode('PFAMs_list')
+
+# Strip whitespace
+foreground_exp['PFAMs_list'] = foreground_exp['PFAMs_list'].str.strip()
+background_exp['PFAMs_list'] = background_exp['PFAMs_list'].str.strip()
+
+# Define PFAM groups to merge related PFAMs into categories
+pfam_group_map = {
+    'Arm-DNA-bind_4': 'Phage integrases',
+    'Phage_int_SAM_3': 'Phage integrases',
+    'Phage_integrase': 'Phage integrases',
+    'Arm-DNA-bind_3': 'Phage integrases',
+    'GFO_IDH_MocA': 'GFO_IDH_MocA_C',
+    'GFO_IDH_MocA_C': 'GFO_IDH_MocA_C',
+    # Add other groups here as needed
+}
+
+def map_to_group(pfam):
+    return pfam_group_map.get(pfam, pfam)  # default to original PFAM if no group
+
+# Map PFAMs to groups
+foreground_exp['PFAM_Group'] = foreground_exp['PFAMs_list'].apply(map_to_group)
+background_exp['PFAM_Group'] = background_exp['PFAMs_list'].apply(map_to_group)
+
+# Count occurrences by PFAM group
+fg_counts = foreground_exp['PFAM_Group'].value_counts()
+bg_counts = background_exp['PFAM_Group'].value_counts()
+
 all_pfams = fg_counts.index.union(bg_counts.index)
 
-# Total counts
-fg_total = len(foreground)
-bg_total = len(background)
+fg_total = len(foreground_exp)
+bg_total = len(background_exp)
 
 # Enrichment analysis
 results = []
@@ -54,8 +88,8 @@ for pfam in all_pfams:
     bg_hits = bg_counts.get(pfam, 0)
     bg_miss = bg_total - bg_hits
 
-    table = [[fg_hits, fg_miss], [bg_hits, bg_miss]]
-    odds_ratio, p_value = fisher_exact(table, alternative="greater")
+    contingency_table = [[fg_hits, fg_miss], [bg_hits, bg_miss]]
+    odds_ratio, p_value = fisher_exact(contingency_table, alternative="greater")
 
     results.append({
         "PFAMs": pfam,
@@ -70,10 +104,13 @@ enrichment_df = pd.DataFrame(results)
 # Multiple testing correction
 enrichment_df["P_Value_Adjusted"] = multipletests(enrichment_df["P_Value"], method='fdr_bh')[1]
 
-# Thresholds
+# Set thresholds
 significance_threshold = 0.05
 odds_ratio_threshold = 1.0
-min_fg_count = 8  # Minimum foreground count cutoff
+
+# Dynamic minimum foreground count cutoff (e.g., 10th percentile)
+min_fg_count = 10
+print(f"Using minimum foreground count cutoff: {min_fg_count}")
 
 # Filter significant terms with cutoff
 significant_filtered = enrichment_df[
@@ -87,11 +124,11 @@ significant_filtered.sort_values("Odds_Ratio", ascending=False, inplace=True)
 
 # Summary
 print("Summary statistics:")
-print(f"Total PFAMs tested: {len(enrichment_df)}")
-print(f"Significant PFAMs (Adj P < {significance_threshold}): {len(enrichment_df[enrichment_df['P_Value_Adjusted'] < significance_threshold])}")
-print(f"Significant PFAMs with OR > {odds_ratio_threshold} and FG count >= {min_fg_count}: {len(significant_filtered)}")
+print(f"Total PFAM groups tested: {len(enrichment_df)}")
+print(f"Significant PFAM groups (Adj P < {significance_threshold}): {len(enrichment_df[enrichment_df['P_Value_Adjusted'] < significance_threshold])}")
+print(f"Significant PFAM groups with OR > {odds_ratio_threshold} and FG count >= {min_fg_count}: {len(significant_filtered)}")
 
-print("\nSignificant Enriched PFAM Domains:")
+print("\nSignificant Enriched PFAM Domains (grouped):")
 for _, row in significant_filtered.iterrows():
     print(f"{row['PFAMs']}: Adj P={row['P_Value_Adjusted']:.3e}, OR={row['Odds_Ratio']:.2f}, FG={row['Foreground_Count']}, BG={row['Background_Count']}")
 
@@ -107,8 +144,8 @@ barplot = sns.barplot(
 )
 
 plt.xlabel("Odds Ratio", fontsize=12)
-plt.ylabel("PFAM Domain", fontsize=12)
-plt.title("Odds Ratio of Significant PFAM Domains", fontsize=14)
+plt.ylabel("PFAM Domain Group", fontsize=12)
+plt.title("Odds Ratio of Significant PFAM Domain Groups", fontsize=14)
 
 # Dynamic annotation positioning
 for p in barplot.patches:
@@ -125,3 +162,10 @@ for p in barplot.patches:
 
 plt.tight_layout()
 plt.show()
+
+# Save filtered significant enrichment results
+significant_filtered.to_csv(
+    "C:/Users/hayat/Downloads/R_files/data/enriched_PFAMs_all_widespread_significant.tsv",
+    sep="\t",
+    index=False
+)
