@@ -6,6 +6,7 @@ from sklearn.decomposition import PCA
 #from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from matplotlib.patches import Patch
+from scipy.stats import mannwhitneyu
 
 # Load your data
 df = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/CoverM_MAPPING_rpkm_Plasmid_Contigs_ouput.tsv", sep="\t", index_col=0)
@@ -591,3 +592,125 @@ for genus, metagenomes in genus_to_metagenomes.items():
 
 # Save to CSV
 #plasmid_vs_genus.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmids_vs_sponge_genera.csv")
+
+
+# RMPK per HMA/LMA
+
+rpkm_per_metagenome = filtered_df.sum(axis=0).reset_index()
+rpkm_per_metagenome.columns = ["Metagenome", "Total_RPKM"]
+
+rpkm_with_genus = rpkm_per_metagenome.merge(host_info, left_on="Metagenome", right_on="Run", how="left")
+
+rpkm_with_genus["Type"] = rpkm_with_genus["biome_genus"].map(hma_lma_dict)
+
+rpkm_with_genus = rpkm_with_genus.dropna(subset=["Type"])
+
+# plt.figure(figsize=(8, 5))
+# sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", palette="Set2")
+# plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
+# plt.ylabel("Total RPKM")
+# plt.xlabel("Sponge Type")
+# plt.yscale("log")  # Optional, use if RPKM values vary widely
+# plt.tight_layout()
+# sns.stripplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", color="black", size=4, jitter=True, alpha=0.5)
+# plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/RPKM_per_metagenome_per_hma_lma.png", dpi=300)
+
+
+# plt.show()
+
+# mann-whitney-u test
+
+
+hma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "HMA"]["Total_RPKM"]
+lma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "LMA"]["Total_RPKM"]
+stat, p_value = mannwhitneyu(hma_data, lma_data, alternative="two-sided")
+
+# Create the plot
+plt.figure(figsize=(8, 5))
+sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", palette="Set2")
+sns.stripplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", color="black", size=4, jitter=True, alpha=0.5)
+
+plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
+plt.ylabel("Total RPKM")
+plt.xlabel("Sponge Type")
+plt.yscale("log")
+plt.tight_layout()
+
+# Annotate statistical significance between HMA and LMA only
+# x-axis positions for HMA and LMA 
+x1, x2 = 0, 1  
+y, h, col = max(hma_data.max(), lma_data.max()) * 1.1, 0.2, 'k'
+plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
+
+# Format the p-value
+if p_value < 0.0001:
+    p_text = "****"
+elif p_value < 0.001:
+    p_text = "***"
+elif p_value < 0.01:
+    p_text = "**"
+elif p_value < 0.05:
+    p_text = "*"
+else:
+    p_text = "ns"
+
+plt.text((x1 + x2) * 0.5, y + h + 0.1, p_text, ha='center', va='bottom', color=col)
+
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/RPKM_per_metagenome_per_hma_lma.png", dpi=300)
+plt.show()
+
+# Calculate plasmid richness per metagenome (number of plasmids with RPKM ≥ 1)
+plasmid_richness = (filtered_df >= 1).sum(axis=0).reset_index()
+plasmid_richness.columns = ["Metagenome", "Plasmid_Richness"]
+
+# Merge with host genus info
+richness_with_genus = plasmid_richness.merge(host_info, left_on="Metagenome", right_on="Run", how="left")
+
+# Assign HMA/LMA status
+richness_with_genus["Type"] = richness_with_genus["biome_genus"].map(hma_lma_dict)
+
+# Drop rows with unknown or missing type
+richness_with_genus = richness_with_genus.dropna(subset=["Type"])
+
+# Mann-Whitney U test
+hma_richness = richness_with_genus[richness_with_genus["Type"] == "HMA"]["Plasmid_Richness"]
+lma_richness = richness_with_genus[richness_with_genus["Type"] == "LMA"]["Plasmid_Richness"]
+stat_rich, p_rich = mannwhitneyu(hma_richness, lma_richness, alternative="two-sided")
+
+# Plot
+plt.figure(figsize=(8, 5))
+sns.boxplot(data=richness_with_genus, x="Type", y="Plasmid_Richness", palette="Set2")
+sns.stripplot(data=richness_with_genus, x="Type", y="Plasmid_Richness", color="black", size=4, jitter=True, alpha=0.5)
+
+plt.title("Plasmid Diversity per Metagenome by Sponge Type (HMA vs LMA)")
+plt.ylabel("Number of Distinct Plasmids (RPKM ≥ 1)")
+plt.xlabel("Sponge Type")
+plt.tight_layout()
+
+# Annotate p-value
+x1, x2 = 0, 1
+y = max(hma_richness.max(), lma_richness.max()) * 1.05
+h = 2
+plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c='k')
+
+if p_rich < 0.0001:
+    p_text = "****"
+elif p_rich < 0.001:
+    p_text = "***"
+elif p_rich < 0.01:
+    p_text = "**"
+elif p_rich < 0.05:
+    p_text = "*"
+else:
+    p_text = "ns"
+
+plt.text((x1 + x2) * 0.5, y + h + 1, p_text, ha='center', va='bottom', color='k')
+
+# Save or show
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.png", dpi=300)
+plt.show()
+
+# Summary statistics for plasmid richness by sponge type
+richness_summary = richness_with_genus.groupby("Type")["Plasmid_Richness"].describe()
+print("\nPlasmid Richness Summary by Sponge Type (HMA vs LMA):")
+print(richness_summary)
