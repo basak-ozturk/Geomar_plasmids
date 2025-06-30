@@ -11,7 +11,6 @@ from scipy.stats import mannwhitneyu
 # Load your data
 df = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/CoverM_MAPPING_rpkm_Plasmid_Contigs_ouput.tsv", sep="\t", index_col=0)
 
-# Filter filtered_df to only contain the plasmids of interest
 
 # Load the plasmid names from the text file into a Python list
 with open("C:/Users/hayat/Downloads/R_files/data/all_sponge_plasmids_names.txt", "r") as f:
@@ -52,11 +51,11 @@ xticks = np.arange(0, np.ceil(log_values.max()) + 0.5, 0.5)
 plt.xticks(xticks)
 
 plt.tight_layout()
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_log10.png", dpi=300, bbox_inches="tight")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_log10.png", dpi=300, bbox_inches="tight")
 
 plt.show()
 
-min_presence = int(0.10 * df.shape[1])  # 10% of columns (metagenomes)
+min_presence = int(0.01 * df.shape[1])  #optional filtering to get rid of some of the data sparsity
 presence = df >= 1
 filtered_df = df[presence.sum(axis=1) >= min_presence]
 # Drop metagenomes that have only zeros after plasmid filtering
@@ -172,7 +171,7 @@ print(clustered_df.groupby("cluster")["metagenome_presence_count"].describe())
 top_global = clustered_df.sort_values("metagenome_presence_count", ascending=False).head(20)
 print(top_global)
 
-#top_global.to_csv("C:/Users/hayat/Downloads/R_files/data/top_global_plasmids_final_plasmids.csv")
+top_global.to_csv("C:/Users/hayat/Downloads/R_files/data/top_global_plasmids_final_plasmids.csv")
 
 most_abundant_by_sample = filtered_df.idxmax()
 abundance_values = filtered_df.max()
@@ -188,7 +187,7 @@ abundance_summary_reset = abundance_summary.reset_index()
 abundance_summary_reset = abundance_summary_reset.rename(columns={"index": "Metagenome"})
 
 # Save with headers
-#abundance_summary_reset.to_csv("C:/Users/hayat/Downloads/R_files/data/most_abundant_plasmid_per_metagenome_final_plasmids.csv", index=False)
+abundance_summary_reset.to_csv("C:/Users/hayat/Downloads/R_files/data/most_abundant_plasmid_per_metagenome_final_plasmids.csv", index=False)
 
 
 # Load the host metadata file
@@ -203,7 +202,7 @@ merged_df = merged_df.drop(columns=["Run"])
 #merged_df["biome_genus"] = merged_df["biome_genus"].fillna("Spongilla")
 
 # Save the merged result
-#merged_df.to_csv("C:/Users/hayat/Downloads/R_files/data/abundance_with_host_final_plasmids.csv", index=False)
+merged_df.to_csv("C:/Users/hayat/Downloads/R_files/data/abundance_with_host_final_plasmids.csv", index=False)
 
 print(merged_df.head())
 
@@ -236,7 +235,7 @@ plt.xticks(rotation=45, ha="right")
 plt.tight_layout()
 
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/metagenome_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/metagenome_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
 
 plt.show()
 
@@ -271,7 +270,7 @@ plt.xlabel("Sponge Genus")
 plt.xticks(rotation=45, ha="right")
 plt.tight_layout()
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
 
 plt.show()
 
@@ -291,7 +290,7 @@ plt.ylabel("log10(Total RPKM)")
 plt.title("Total Plasmid Abundance per Sponge Genus")
 plt.tight_layout()
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/rpkm_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/rpkm_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
 
 plt.show()
 
@@ -302,7 +301,7 @@ plt.ylabel("log10(Total RPKM)")
 plt.title("Log-Transformed Total Plasmid Abundance per Sponge Genus")
 plt.tight_layout()
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/rpkm_count_per_genus_log_final_plasmids.png", dpi=300, bbox_inches="tight")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/rpkm_count_per_genus_log_final_plasmids.png", dpi=300, bbox_inches="tight")
 
 plt.show()
 
@@ -318,11 +317,11 @@ plt.yscale("log")  # Optional, if you have high variance
 plt.xlabel("Sponge Genus")
 plt.ylabel("Total RPKM per Metagenome")
 plt.title("Plasmid Abundance per Metagenome, Colored by Host Genus")
-#plt.legend(title="Genus", bbox_to_anchor=(1.05, 1), loc="upper left")
+plt.legend(title="Genus", bbox_to_anchor=(1.05, 1), loc="upper left")
 plt.xticks(rotation=45, ha="right")
 plt.tight_layout()
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/scatter_metagenome_rpkm_by_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/scatter_metagenome_rpkm_by_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 # Create boxplot
@@ -361,70 +360,116 @@ plt.title("Plasmid Abundance per Metagenome by Host Genus (n ≥ 3)")
 plt.xticks(rotation=45, ha="right")
 plt.tight_layout()
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/boxplot_metagenome_rpkm_by_genus_filtered_final_plasmids.png", dpi=300, bbox_inches="tight")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/boxplot_metagenome_rpkm_by_genus_filtered_final_plasmids.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 # Most widespread plasmids
 
-most_widespread = clustered_df.sort_values("metagenome_presence_count", ascending=False).head(500)
-#most_widespread.to_csv("C:/Users/hayat/Downloads/R_files/data/top_widespread_plasmids_final_plasmids.csv")
+# Compute presence (number of metagenomes with RPKM ≥ 1)
+binary_matrix = (filtered_df >= 1).astype(int)
+presence_counts = binary_matrix.sum(axis=1)
 
-total_abundance = filtered_df.sum(axis=1).sort_values(ascending=False)
-top_abundant_total = total_abundance.head(500)
-#top_abundant_total.to_csv("C:/Users/hayat/Downloads/R_files/data/top_abundant_plasmids_total_final_plasmids.csv")
+# Compute total and mean abundance
+total_abundance = filtered_df.sum(axis=1)
+mean_abundance = filtered_df.replace(0, np.nan).mean(axis=1)
 
-mean_abundance = filtered_df.replace(0, np.nan).mean(axis=1).sort_values(ascending=False)
-top_abundant_mean = mean_abundance.head(500)
-#top_abundant_mean.to_csv("C:/Users/hayat/Downloads/R_files/data/top_abundant_plasmids_mean_final_plasmids.csv")
+# Define 90th percentiles (top 10%)
+presence_thresh = presence_counts.quantile(0.90)
+total_abundance_thresh = total_abundance.quantile(0.90)
 
-# Intersect top 500 widespread and top 500 abundant plasmids
+# Get plasmids above thresholds
+most_widespread = presence_counts[presence_counts >= presence_thresh]
+top_abundant_total = total_abundance[total_abundance >= total_abundance_thresh]
+
+# Intersect widespread and abundant plasmids
 widespread_set = set(most_widespread.index)
 abundant_set = set(top_abundant_total.index)
-
 top_both = widespread_set & abundant_set
-print(f"{len(top_both)} plasmids are both highly widespread and abundant.")
+
+print(f"{len(top_both)} plasmids are both highly widespread and abundant (top 10%).")
 
 # Save to file
-#filtered_df.loc[list(top_both)].to_csv("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmids.csv")
+filtered_df.loc[list(top_both)].to_csv(
+    "C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmids.csv"
+)
+# Restrict to top abundant and widespread plasmids
+top_df = filtered_df.loc[list(top_both)]
 
-plt.figure(figsize=(8, 6))
+# 1. Number of metagenomes with RPKM ≥ 1 per plasmid
+top_presence_counts = (top_df >= 1).sum(axis=1)
 
-# Plot all points
+# 2. Mean RPKM per plasmid (non-zero values only)
+top_mean_rpkm = top_df.replace(0, np.nan).mean(axis=1)
+
+# 3. Number of *sponge genera* in which each plasmid is found
+
+# Transpose top_df to get metagenomes as rows
+top_df_T = top_df.T
+
+# Merge with genus info
+top_df_with_genus = top_df_T.merge(host_info, left_index=True, right_on="Run", how="left")
+
+# Group by plasmid (i.e., column) and count unique genera with RPKM ≥ 1
+def count_genera_with_presence(plasmid_column):
+    present = top_df_with_genus[top_df_with_genus[plasmid_column] >= 1]
+    return present["biome_genus"].nunique()
+
+top_host_genus_counts = pd.Series({plasmid: count_genera_with_presence(plasmid) for plasmid in top_df.columns})
+
+# Combine into summary DataFrame
+summary_df = pd.DataFrame({
+    "Metagenome_Presence_Count": top_presence_counts,
+    "Mean_RPKM": top_mean_rpkm,
+    "Host_Genus_Count": top_host_genus_counts
+})
+
+# Save summary to CSV
+summary_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_plasmid_summary.csv")
+
+# Plot
+plt.figure(figsize=(10, 7))
+
+# Prepare color and size based on category
+colors = ['red' if idx in top_both else 'gray' for idx in clustered_df.index]
+sizes = [50 if idx in top_both else 15 for idx in clustered_df.index]
+
 plt.scatter(
     clustered_df["metagenome_presence_count"],
-    total_abundance[clustered_df.index],
-    alpha=0.3,
-    #label="All plasmids"
+    total_abundance[clustered_df.index] + 1e-3,  # Avoid log(0)
+    c=colors,
+    s=sizes,
+    alpha=0.6,
+    edgecolor='k',
+    linewidth=0.2
 )
 
-# Highlight the top widespread & abundant ones
-top_both_list = list(top_both)
-highlight_df = clustered_df.loc[top_both_list]
-highlight_abundance = total_abundance.loc[top_both_list]
+# Add threshold lines
+plt.axhline(y=total_abundance_thresh, color='darkgray', linestyle='--', label='90th %ile abundance')
+plt.axvline(x=presence_thresh, color='darkgray', linestyle='--', label='90th %ile presence')
 
-plt.scatter(
-    highlight_df["metagenome_presence_count"],
-    highlight_abundance,
-    color='red',
-    label="Top abundant & widespread",
-    s=50
-)
-
-# Optional: Annotate a few of them (e.g., the top 5 by abundance)
-for plasmid_id in list(highlight_abundance.sort_values(ascending=False).head(5).index):
+# Annotate top 5 most abundant among top_both
+highlight_abundance = total_abundance.loc[list(top_both)]
+top_labels = highlight_abundance.sort_values(ascending=False).head(5)
+for plasmid_id in top_labels.index:
     x = clustered_df.loc[plasmid_id, "metagenome_presence_count"]
     y = total_abundance.loc[plasmid_id]
-    plt.text(x, y, plasmid_id[:20], fontsize=7)  # abbreviate if names are long
+    plt.text(x, y + 0.05 * y, plasmid_id[:20], fontsize=7, ha='center')
 
-plt.xlabel("Number of Metagenomes with RPKM ≥ 1")
-plt.ylabel("Total RPKM across Metagenomes")
-plt.title("Plasmid Widespreadness vs. Abundance")
+# Axis and aesthetics
+plt.yscale("log")
+plt.xlabel("Number of Metagenomes with RPKM ≥ 1", fontsize=12)
+plt.ylabel("Total RPKM across Metagenomes (log scale)", fontsize=12)
+plt.title(f"Plasmid Widespreadness vs. Abundance\n({len(top_both)} plasmids in top 10% both)", fontsize=14)
 plt.legend()
+plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.3)
 plt.tight_layout()
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_vs_abundance_highlighted_final_plasmids.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_vs_abundance_highlighted_final_plasmids.png", dpi=300)
 plt.show()
-
 # Distribution of top widespread and abundant plasmids across host genera
+# Save plasmid IDs to a text file
+with open("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_plasmid_names.txt", "w") as f:
+    for plasmid_id in sorted(top_both):
+        f.write(plasmid_id + "\n")
 
 # Filter to top_both plasmids
 top_both_df = filtered_df.loc[filtered_df.index.intersection(top_both)]
@@ -477,8 +522,8 @@ print(relative_presence_matrix.describe())
 
 # HMA-LMA status dictionary (https://www.nature.com/articles/s41598-018-26641-9, 
 #https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2017.00752/full),
-#https://link.springer.com/article/10.1007/s002270000503
-
+#https://link.springer.com/article/10.1007/s002270000503, 10.3389/fmicb.2021.771589
+#https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-020-00877-y
 hma_lma_dict = {
     "Coscinoderma": "HMA",
     "Agelas": "HMA",
@@ -487,19 +532,25 @@ hma_lma_dict = {
     "Cinachyrella": "LMA",
     "Niphates": "LMA",
     "Mycale": "LMA",
-    "Spongilla": "Unknown",
+    "Spongilla": "LMA",
     "Halichondria": "LMA",
     "Haliclona": "LMA",
     "Cliona": "LMA",
     "Phyllospongia": "LMA",
-    "Rhopaloides": "LMA", 
+    "Rhopaloeides": "LMA", 
     "Manihinea": "Unknown",
     "Theonella": "HMA",
-    "Aiolochroia": "Unknown",
+    "Aiolochroia": "HMA",
     "Pseudoceratina": "HMA",
     "Xestospongia": "LMA",
     "Aplysina": "HMA",
     "Ircinia": "HMA",
+    "Ianthella": "LMA",
+    "Isodictya": "LMA",
+    "Ephydatia": "LMA",
+    "Pericharax": "Unknown",
+    "Cymbastela": "LMA",
+    "Lamellodysidea": "LMA",
     
 }
 
@@ -509,16 +560,15 @@ genus_base_names = [label.split(" (n=")[0] for label in relative_presence_matrix
 hma_lma_colors = {
     "HMA": "darkgreen",
     "LMA": "orange",
+    "Unknown": "lightgrey"
 }
 
 hma_lma_labels = [hma_lma_dict.get(genus, "Unknown") for genus in genus_base_names]
 col_colors = [hma_lma_colors.get(label, "lightgrey") for label in hma_lma_labels]
 
 
-
-
 # Plot
-#relative_presence_matrix.to_csv("C:/Users/hayat/Downloads/R_files/data/top_279_plasmid_relative_presence_matrix_filtered.csv")
+relative_presence_matrix.to_csv("C:/Users/hayat/Downloads/R_files/data/top_279_plasmid_relative_presence_matrix_filtered.csv")
 
 
 g = sns.clustermap(
@@ -550,7 +600,7 @@ g.ax_heatmap.tick_params(axis='y', which='both', length=0)
 g.ax_heatmap.set_yticklabels([])
 
 plt.suptitle(
-    "Clustered Relative Presence of Top 279 Abundant & Widespread Plasmids\nAcross Host Genera (>1 metagenome with plasmid)",
+    "Clustered Relative Presence of Top 25% Abundant & Widespread Plasmids\nAcross Host Genera (>1 metagenome with plasmid)",
     fontsize=18,
     y=1.05
 )
@@ -562,13 +612,13 @@ g.ax_col_dendrogram.legend(
     handles=legend_handles,
     title="Host Microbial Abundance",
     loc="center",
-    bbox_to_anchor=(1.1, -3),
+    bbox_to_anchor=(1.2, -3),
     ncol=3
 )
 g.ax_heatmap.set_xlabel("Host Genus (with metagenome count)", fontsize=12)
 g.ax_heatmap.set_ylabel("Plasmid", fontsize=12)
 
-#g.savefig("C:/Users/hayat/Downloads/R_files/graphs/top_279_abundant_widespread_relative_presence_clustermap.png", dpi=300)
+g.savefig("C:/Users/hayat/Downloads/R_files/graphs/top_10_percent_abundant_widespread_relative_presence_clustermap.png", dpi=300)
 plt.show()
 
 # Map metagenomes (columns) to their sponge genus
@@ -591,10 +641,10 @@ for genus, metagenomes in genus_to_metagenomes.items():
     plasmid_vs_genus[genus] = genus_presence
 
 # Save to CSV
-#plasmid_vs_genus.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmids_vs_sponge_genera.csv")
+plasmid_vs_genus.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmids_vs_sponge_genera.csv")
 
 
-# RMPK per HMA/LMA
+# PKM per HMA/LMA
 
 rpkm_per_metagenome = filtered_df.sum(axis=0).reset_index()
 rpkm_per_metagenome.columns = ["Metagenome", "Total_RPKM"]
@@ -625,24 +675,33 @@ hma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "HMA"]["Total_RPKM"]
 lma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "LMA"]["Total_RPKM"]
 stat, p_value = mannwhitneyu(hma_data, lma_data, alternative="two-sided")
 
-# Create the plot
 plt.figure(figsize=(8, 5))
-sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", palette="Set2")
-sns.stripplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", color="black", size=4, jitter=True, alpha=0.5)
 
-plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
-plt.ylabel("Total RPKM")
-plt.xlabel("Sponge Type")
+# Basic boxplot
+sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", palette="Set2", showfliers=True)
+
+# Calculate means and medians
+grouped = rpkm_with_genus.groupby("Type")["Total_RPKM"]
+means = grouped.mean()
+medians = grouped.median()
+
+# Overlay mean and median markers
+for i, group in enumerate(means.index):
+    plt.scatter(i, means[group], color='blue', marker='D', label='Mean' if i == 0 else "", s=60, edgecolor='black', zorder=10)
+    plt.scatter(i, medians[group], color='red', marker='o', label='Median' if i == 0 else "", s=60, edgecolor='black', zorder=10)
+
 plt.yscale("log")
-plt.tight_layout()
+plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
+plt.ylabel("Total RPKM (log scale)")
+plt.xlabel("Sponge Type")
 
-# Annotate statistical significance between HMA and LMA only
-# x-axis positions for HMA and LMA 
-x1, x2 = 0, 1  
-y, h, col = max(hma_data.max(), lma_data.max()) * 1.1, 0.2, 'k'
+# Add legend for mean and median
+plt.legend()
+
+x1, x2 = 0, 1
+y, h, col = rpkm_with_genus["Total_RPKM"].max() * 1.1, 0.2, 'k'
 plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
 
-# Format the p-value
 if p_value < 0.0001:
     p_text = "****"
 elif p_value < 0.001:
@@ -654,9 +713,11 @@ elif p_value < 0.05:
 else:
     p_text = "ns"
 
-plt.text((x1 + x2) * 0.5, y + h + 0.1, p_text, ha='center', va='bottom', color=col)
+plt.text((x1 + x2) * 0.5, y + h + 0.05, p_text, ha='center', va='bottom', color=col)
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/RPKM_per_metagenome_per_hma_lma.png", dpi=300)
+plt.tight_layout()
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_per_hma_lma.png", dpi=300)
+
 plt.show()
 
 # Calculate plasmid richness per metagenome (number of plasmids with RPKM ≥ 1)
@@ -677,15 +738,26 @@ hma_richness = richness_with_genus[richness_with_genus["Type"] == "HMA"]["Plasmi
 lma_richness = richness_with_genus[richness_with_genus["Type"] == "LMA"]["Plasmid_Richness"]
 stat_rich, p_rich = mannwhitneyu(hma_richness, lma_richness, alternative="two-sided")
 
-# Plot
-plt.figure(figsize=(8, 5))
-sns.boxplot(data=richness_with_genus, x="Type", y="Plasmid_Richness", palette="Set2")
-sns.stripplot(data=richness_with_genus, x="Type", y="Plasmid_Richness", color="black", size=4, jitter=True, alpha=0.5)
+
+sns.boxplot(data=richness_with_genus, x="Type", y="Plasmid_Richness", palette="Set2", showfliers=True)
+
+# Calculate means and medians
+grouped = richness_with_genus.groupby("Type")["Plasmid_Richness"]
+means = grouped.mean()
+medians = grouped.median()
+
+# Overlay mean and median markers
+for i, group in enumerate(means.index):
+    plt.scatter(i, means[group], color='blue', marker='D', label='Mean' if i == 0 else "", s=60, edgecolor='black', zorder=10)
+    plt.scatter(i, medians[group], color='red', marker='o', label='Median' if i == 0 else "", s=60, edgecolor='black', zorder=10)
 
 plt.title("Plasmid Diversity per Metagenome by Sponge Type (HMA vs LMA)")
 plt.ylabel("Number of Distinct Plasmids (RPKM ≥ 1)")
 plt.xlabel("Sponge Type")
-plt.tight_layout()
+
+# Add legend for mean and median
+plt.legend()
+
 
 # Annotate p-value
 x1, x2 = 0, 1
@@ -706,7 +778,6 @@ else:
 
 plt.text((x1 + x2) * 0.5, y + h + 1, p_text, ha='center', va='bottom', color='k')
 
-# Save or show
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.png", dpi=300)
 plt.show()
 

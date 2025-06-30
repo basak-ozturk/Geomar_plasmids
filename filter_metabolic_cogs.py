@@ -4,7 +4,7 @@ from io import StringIO
 # Define the COG categories of interest (metabolic functions)
 metabolic_cogs = set("CEFGHIPQ")
 
-input_path = "C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmids_eggnog.tsv"
+input_path = "C:/Users/hayat/Downloads/R_files/data/filtered_foreground_eggnog_annotations.tsv"
 output_path = "C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmids_eggnog_metabolic.tsv"
 
 # Step 1: Read the file into memory once and find header line

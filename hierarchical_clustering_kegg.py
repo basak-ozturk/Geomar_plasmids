@@ -4,7 +4,7 @@ import seaborn as sns
 from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
 from scipy.spatial.distance import pdist
 import matplotlib.patches as mpatches
-#from matplotlib.colors import ListedColormap, Normalize
+from matplotlib.colors import Normalize
 import numpy as np
 #import matplotlib.colors as mcolors
 
@@ -192,7 +192,7 @@ clustermap = sns.clustermap(
     dendrogram_ratio=(0.2, 0.1),
     cbar_pos=None,
     method="ward",
-    row_colors=row_colors  # LEFT side host bar
+    #row_colors=row_colors  # LEFT side host bar
 )
 
 # Add host legend (bottom-left)
@@ -257,7 +257,7 @@ for cluster in unique_clusters:
         fontweight="bold"
     )
 
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/pathway_clustermap_with_hosts_and_clusters.png", dpi=300, bbox_inches="tight", pad_inches=0.1)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/pathway_clustermap_with_clusters.png", dpi=300, bbox_inches="tight", pad_inches=0.1)
 plt.show()
 
 # Save cluster assignments

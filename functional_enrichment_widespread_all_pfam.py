@@ -10,9 +10,10 @@ from scipy.stats import fisher_exact
 from statsmodels.stats.multitest import multipletests
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from statsmodels.stats.contingency_tables import Table2x2
+import numpy as np
 # Load list of plasmids
-with open("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmid_names.csv") as f:
+with open("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_plasmid_names.txt") as f:
     plasmids = set(line.strip() for line in f if line.strip())
 
 # Find header line in eggNOG annotations
@@ -80,7 +81,6 @@ all_pfams = fg_counts.index.union(bg_counts.index)
 fg_total = len(foreground_exp)
 bg_total = len(background_exp)
 
-# Enrichment analysis
 results = []
 for pfam in all_pfams:
     fg_hits = fg_counts.get(pfam, 0)
@@ -89,20 +89,25 @@ for pfam in all_pfams:
     bg_miss = bg_total - bg_hits
 
     contingency_table = [[fg_hits, fg_miss], [bg_hits, bg_miss]]
-    odds_ratio, p_value = fisher_exact(contingency_table, alternative="greater")
+    table = Table2x2(contingency_table)
+
+    odds_ratio = table.oddsratio
+    ci_low, ci_upp = table.oddsratio_confint()
+    p_value = fisher_exact(contingency_table, alternative="greater")[1]
 
     results.append({
         "PFAMs": pfam,
         "Foreground_Count": fg_hits,
         "Background_Count": bg_hits,
         "Odds_Ratio": odds_ratio,
+        "CI_Lower": ci_low,
+        "CI_Upper": ci_upp,
         "P_Value": p_value
     })
 
 enrichment_df = pd.DataFrame(results)
-
-# Multiple testing correction
 enrichment_df["P_Value_Adjusted"] = multipletests(enrichment_df["P_Value"], method='fdr_bh')[1]
+
 
 # Set thresholds
 significance_threshold = 0.05
@@ -132,40 +137,53 @@ print("\nSignificant Enriched PFAM Domains (grouped):")
 for _, row in significant_filtered.iterrows():
     print(f"{row['PFAMs']}: Adj P={row['P_Value_Adjusted']:.3e}, OR={row['Odds_Ratio']:.2f}, FG={row['Foreground_Count']}, BG={row['Background_Count']}")
 
-# Visualization
-plt.figure(figsize=(10, 6))
+# Filter again
+significant_filtered = enrichment_df[
+    (enrichment_df["P_Value_Adjusted"] < significance_threshold) &
+    (enrichment_df["Odds_Ratio"] > odds_ratio_threshold) &
+    (enrichment_df["Foreground_Count"] >= min_fg_count)
+].copy()
+
+# Add log2-transformed odds ratio and CI bounds
+significant_filtered["log2_OR"] = np.log2(significant_filtered["Odds_Ratio"])
+significant_filtered["log2_CI_Lower"] = np.log2(significant_filtered["CI_Lower"])
+significant_filtered["log2_CI_Upper"] = np.log2(significant_filtered["CI_Upper"])
+
+# Sort for plotting
+significant_filtered.sort_values("log2_OR", ascending=True, inplace=True)
+
+# Plot with error bars (forest plot style)
+plt.figure(figsize=(10, 8))
 sns.set(style="whitegrid")
 
-barplot = sns.barplot(
-    x="Odds_Ratio",
-    y="PFAMs",
-    data=significant_filtered,
-    palette="viridis"
+plt.errorbar(
+    x=significant_filtered["log2_OR"],
+    y=significant_filtered["PFAMs"],
+    xerr=[significant_filtered["log2_OR"] - significant_filtered["log2_CI_Lower"],
+          significant_filtered["log2_CI_Upper"] - significant_filtered["log2_OR"]],
+    fmt='o',
+    color='black',
+    ecolor='gray',
+    elinewidth=2,
+    capsize=4
 )
 
-plt.xlabel("Odds Ratio", fontsize=12)
+plt.axvline(0, color='red', linestyle='--', label='OR = 1')
+plt.xlabel(r'$\log_2(\mathrm{Odds\ Ratio})$', fontsize=12)
 plt.ylabel("PFAM Domain Group", fontsize=12)
-plt.title("Odds Ratio of Significant PFAM Domain Groups", fontsize=14)
-
-# Dynamic annotation positioning
-for p in barplot.patches:
-    width = p.get_width()
-    barplot.text(
-        width + 0.1,
-        p.get_y() + p.get_height() / 2,
-        f"{width:.2f}",
-        ha="left",
-        va="center",
-        fontsize=10,
-        color="black"
-    )
-
+plt.title("PFAM Enrichment in Widespread Plasmids\n(log₂ Odds Ratio with 95% CI)", fontsize=14)
 plt.tight_layout()
+plt.legend()
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/enriched_PFAMs_OR_with_CI.png", dpi=300)
+
 plt.show()
 
 # Save filtered significant enrichment results
 significant_filtered.to_csv(
-    "C:/Users/hayat/Downloads/R_files/data/enriched_PFAMs_all_widespread_significant.tsv",
+    "C:/Users/hayat/Downloads/R_files/data/enriched_PFAMs_all_widespread_significant_with_CI.tsv",
     sep="\t",
     index=False
 )
+
+foreground.to_csv("C:/Users/hayat/Downloads/R_files/data/filtered_foreground_eggnog_annotations.tsv", sep="\t", index=False)
+
