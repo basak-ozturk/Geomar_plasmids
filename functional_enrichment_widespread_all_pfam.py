@@ -113,8 +113,8 @@ enrichment_df["P_Value_Adjusted"] = multipletests(enrichment_df["P_Value"], meth
 significance_threshold = 0.05
 odds_ratio_threshold = 1.0
 
-# Dynamic minimum foreground count cutoff (e.g., 10th percentile)
-min_fg_count = 10
+
+min_fg_count = 5
 print(f"Using minimum foreground count cutoff: {min_fg_count}")
 
 # Filter significant terms with cutoff
@@ -171,7 +171,9 @@ plt.errorbar(
 plt.axvline(0, color='red', linestyle='--', label='OR = 1')
 plt.xlabel(r'$\log_2(\mathrm{Odds\ Ratio})$', fontsize=12)
 plt.ylabel("PFAM Domain Group", fontsize=12)
-plt.title("PFAM Enrichment in Widespread Plasmids\n(log₂ Odds Ratio with 95% CI)", fontsize=14)
+plt.title(r'PFAM Enrichment in Widespread Plasmids' + '\n' +
+          r'$\left(\log_2(\mathrm{Odds\ Ratio\ with\ 95\%\ CI})\right)$')
+
 plt.tight_layout()
 plt.legend()
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/enriched_PFAMs_OR_with_CI.png", dpi=300)
@@ -185,5 +187,5 @@ significant_filtered.to_csv(
     index=False
 )
 
-foreground.to_csv("C:/Users/hayat/Downloads/R_files/data/filtered_foreground_eggnog_annotations.tsv", sep="\t", index=False)
+#foreground.to_csv("C:/Users/hayat/Downloads/R_files/data/filtered_foreground_eggnog_annotations.tsv", sep="\t", index=False)
 
