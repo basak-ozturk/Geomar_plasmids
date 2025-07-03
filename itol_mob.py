@@ -5,7 +5,7 @@ Created on Thu Jun 26 09:02:08 2025
 @author: hayat
 """
 
-with open("C:/Users/hayat/Downloads/R_files/data/widespread_plasmids_relaxase_proteins.txt") as f:
+with open("C:/Users/hayat/Downloads/R_files/data/integrase_proteins_widepsread.txt") as f:
     mob_ids = [line.strip().rsplit('_', 1)[0] for line in f]
 
 mob_plasmids = set(mob_ids)
