@@ -74,14 +74,14 @@ melted_df = filtered_df_reset.melt(id_vars='Genome', var_name='Metagenome', valu
 # Optional: drop zero-RPKM values for better clarity in plots
 melted_df_nonzero = melted_df[melted_df["RPKM"] > 0]
 
-# Boxplot of plasmid abundance per metagenome
-plt.figure(figsize=(14, 6))
-sns.boxplot(data=melted_df_nonzero, x="Metagenome", y="RPKM")
-plt.xticks(rotation=90)
-plt.yscale("log")
-plt.title("Distribution of Plasmid RPKM Values per Metagenome")
-plt.tight_layout()
-plt.show()
+# # Boxplot of plasmid abundance per metagenome
+# plt.figure(figsize=(14, 6))
+# sns.boxplot(data=melted_df_nonzero, x="Metagenome", y="RPKM")
+# plt.xticks(rotation=90)
+# plt.yscale("log")
+# plt.title("Distribution of Plasmid RPKM Values per Metagenome")
+# plt.tight_layout()
+# plt.show()
 
 # Plot top N ranked RPKMs for each metagenome
 plt.figure(figsize=(10, 6))
@@ -426,6 +426,13 @@ summary_df = pd.DataFrame({
 # Save summary to CSV
 summary_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_plasmid_summary.csv")
 
+# Top 5 by abundance (overall)
+top5_abundant = total_abundance.sort_values(ascending=False).head(2)
+
+# Top 5 by presence count (overall)
+top5_widespread = presence_counts.sort_values(ascending=False).head(5)
+
+
 # Plot
 plt.figure(figsize=(10, 7))
 
@@ -445,16 +452,28 @@ plt.scatter(
 
 # Add threshold lines
 plt.axhline(y=total_abundance_thresh, color='darkgray', linestyle='--', label='90th %ile abundance')
-plt.axvline(x=presence_thresh, color='darkgray', linestyle='--', label='90th %ile presence')
+plt.axvline(x=presence_thresh, color='darkblue', linestyle='--', label='90th %ile presence')
 
 # Annotate top 5 most abundant among top_both
 highlight_abundance = total_abundance.loc[list(top_both)]
 top_labels = highlight_abundance.sort_values(ascending=False).head(5)
+
+for plasmid_id in top5_abundant.index:
+    if plasmid_id in clustered_df.index:
+        x = clustered_df.loc[plasmid_id, "metagenome_presence_count"]
+        y = total_abundance.loc[plasmid_id]
+        plt.text(x, y + 0.05 * y, plasmid_id[:20], fontsize=7, ha='center')
+        #plt.scatter(x, y + 1e-3, color='darkgreen', s=60, edgecolor='black', linewidth=0.3, zorder=5)
+for plasmid_id in top5_widespread.index:
+    if plasmid_id in clustered_df.index:
+        x = clustered_df.loc[plasmid_id, "metagenome_presence_count"]
+        y = total_abundance.loc[plasmid_id]
+        plt.text(x, y + 0.05 * y, plasmid_id[:20], fontsize=7, ha='center')
+        #plt.scatter(x, y + 1e-3, color='blue', s=60, edgecolor='black', linewidth=0.3, zorder=5)
 for plasmid_id in top_labels.index:
     x = clustered_df.loc[plasmid_id, "metagenome_presence_count"]
     y = total_abundance.loc[plasmid_id]
     plt.text(x, y + 0.05 * y, plasmid_id[:20], fontsize=7, ha='center')
-
 # Axis and aesthetics
 plt.yscale("log")
 plt.xlabel("Number of Metagenomes with RPKM ≥ 1", fontsize=12)

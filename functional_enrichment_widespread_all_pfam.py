@@ -171,7 +171,7 @@ plt.errorbar(
 plt.axvline(0, color='red', linestyle='--', label='OR = 1')
 plt.xlabel(r'$\log_2(\mathrm{Odds\ Ratio})$', fontsize=12)
 plt.ylabel("PFAM Domain Group", fontsize=12)
-plt.title(r'PFAM Enrichment in Widespread Plasmids' + '\n' +
+plt.title(r'PFAM Enrichment in Abundant and Widespread Plasmids' + '\n' +
           r'$\left(\log_2(\mathrm{Odds\ Ratio\ with\ 95\%\ CI})\right)$')
 
 plt.tight_layout()

@@ -13,11 +13,12 @@ import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 
 def parse_lat_lon(latlon_str):
+    if pd.isna(latlon_str):
+        return pd.Series({'Latitude': np.nan, 'Longitude': np.nan})
     parts = latlon_str.strip().split()
     lat = float(parts[0]) * (-1 if parts[1] == 'S' else 1)
     lon = float(parts[2]) * (-1 if parts[3] == 'W' else 1)
     return pd.Series({'Latitude': lat, 'Longitude': lon})
-
 
 
 # Load metadata
@@ -50,6 +51,8 @@ final_df[['Latitude', 'Longitude']] = final_df['lat_lon'].apply(parse_lat_lon)
 fig = px.scatter_geo(final_df, lat='Latitude', lon='Longitude',
                      color='host_genus', hover_name='Plasmid',
                      projection='natural earth')
+fig.update_traces(marker=dict(size=10, line=dict(width=0.5, color='black')))
+fig.update_layout(title="Global Occurrence Map for the Top Widespread and Abundant Plasmids", legend_title="Host Genus")
 fig.write_html("C:/Users/hayat/Downloads/R_files/graphs/plasmid_map.html")
 
 fig.show()
