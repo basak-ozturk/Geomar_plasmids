@@ -22,38 +22,38 @@ df = df.loc[df.index.isin(plasmid_names_list)]
 # Compute each plasmid’s maximum (log-transformed) RPKM across all metagenomes
 max_rpkm = df.max(axis=1)
 
-# Inspect the distribution of those maxima
-plt.figure(figsize=(6,4))
-max_rpkm.hist(bins=50)
-plt.title("Distribution of max(log2-RPKM+1) per plasmid")
-plt.xlabel("max(log2-RPKM+1)")
-plt.ylabel("count of plasmids")
-plt.tight_layout()
-plt.show()
+# # Inspect the distribution of those maxima
+# plt.figure(figsize=(6,4))
+# max_rpkm.hist(bins=50)
+# plt.title("Distribution of max(log2-RPKM+1) per plasmid")
+# plt.xlabel("max(log2-RPKM+1)")
+# plt.ylabel("count of plasmids")
+# plt.tight_layout()
+# plt.show()
 
-print(df.describe())
+# print(df.describe())
 
-plt.show()
+# plt.show()
 
 nonzero_values = df.values[df.values > 0]
 log_values = np.log10(nonzero_values + 1)
 
-plt.figure(figsize=(8, 4))
-plt.hist(log_values, bins=100, color='steelblue', edgecolor='k')
-plt.axvline(np.log10(1+ 1), color='red', linestyle='--', label='RPKM = 1')
-plt.xlabel("log10(RPKM + 1)")
-plt.ylabel("Frequency")
-plt.title("Distribution of non-zero RPKM values")
-plt.legend()
+# plt.figure(figsize=(8, 4))
+# plt.hist(log_values, bins=100, color='steelblue', edgecolor='k')
+# plt.axvline(np.log10(1+ 1), color='red', linestyle='--', label='RPKM = 1')
+# plt.xlabel("log10(RPKM + 1)")
+# plt.ylabel("Frequency")
+# plt.title("Distribution of non-zero RPKM values")
+# plt.legend()
 
-# Set x-axis ticks every 0.1 between 0 and max(log_values)
-xticks = np.arange(0, np.ceil(log_values.max()) + 0.5, 0.5)
-plt.xticks(xticks)
+# # Set x-axis ticks every 0.1 between 0 and max(log_values)
+# xticks = np.arange(0, np.ceil(log_values.max()) + 0.5, 0.5)
+# plt.xticks(xticks)
 
-plt.tight_layout()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_log10.png", dpi=300, bbox_inches="tight")
+# plt.tight_layout()
+# plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_log10.png", dpi=300, bbox_inches="tight")
 
-plt.show()
+# plt.show()
 
 min_presence = int(0.01 * df.shape[1])  #optional filtering to get rid of some of the data sparsity
 presence = df >= 1
@@ -288,6 +288,7 @@ sns.barplot(x=log_total_rpkm.index, y=genus_total_rpkm.values, palette="muted")
 plt.xticks(rotation=45, ha="right")
 plt.ylabel("log10(Total RPKM)")
 plt.title("Total Plasmid Abundance per Sponge Genus")
+plt.xlabel("Sponge Genus")
 plt.tight_layout()
 
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/rpkm_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
@@ -299,6 +300,7 @@ sns.barplot(x=log_total_rpkm.index, y=log_total_rpkm.values, palette="muted")
 plt.xticks(rotation=45, ha="right")
 plt.ylabel("log10(Total RPKM)")
 plt.title("Log-Transformed Total Plasmid Abundance per Sponge Genus")
+plt.xlabel("Sponge Genus")
 plt.tight_layout()
 
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/rpkm_count_per_genus_log_final_plasmids.png", dpi=300, bbox_inches="tight")
@@ -395,13 +397,13 @@ filtered_df.loc[list(top_both)].to_csv(
 # Restrict to top abundant and widespread plasmids
 top_df = filtered_df.loc[list(top_both)]
 
-# 1. Number of metagenomes with RPKM ≥ 1 per plasmid
+# Number of metagenomes with RPKM ≥ 1 per plasmid
 top_presence_counts = (top_df >= 1).sum(axis=1)
 
-# 2. Mean RPKM per plasmid (non-zero values only)
+# Mean RPKM per plasmid (non-zero values only)
 top_mean_rpkm = top_df.replace(0, np.nan).mean(axis=1)
 
-# 3. Number of *sponge genera* in which each plasmid is found
+# Number of *sponge genera* in which each plasmid is found
 
 # Transpose top_df to get metagenomes as rows
 top_df_T = top_df.T
@@ -414,7 +416,7 @@ def count_genera_with_presence(plasmid_column):
     present = top_df_with_genus[top_df_with_genus[plasmid_column] >= 1]
     return present["biome_genus"].nunique()
 
-top_host_genus_counts = pd.Series({plasmid: count_genera_with_presence(plasmid) for plasmid in top_df.columns})
+top_host_genus_counts = pd.Series({plasmid: count_genera_with_presence(plasmid) for plasmid in top_df.index})
 
 # Combine into summary DataFrame
 summary_df = pd.DataFrame({
@@ -437,7 +439,7 @@ top5_widespread = presence_counts.sort_values(ascending=False).head(5)
 plt.figure(figsize=(10, 7))
 
 # Prepare color and size based on category
-colors = ['red' if idx in top_both else 'gray' for idx in clustered_df.index]
+colors = ['blue' if idx in top_both else 'gray' for idx in clustered_df.index]
 sizes = [50 if idx in top_both else 15 for idx in clustered_df.index]
 
 plt.scatter(
@@ -542,36 +544,67 @@ print(relative_presence_matrix.describe())
 # HMA-LMA status dictionary (https://www.nature.com/articles/s41598-018-26641-9, 
 #https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2017.00752/full),
 #https://link.springer.com/article/10.1007/s002270000503, 10.3389/fmicb.2021.771589
-#https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-020-00877-y
+#https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-020-00877-y,
+#https://pmc.ncbi.nlm.nih.gov/articles/PMC4036034/, https://pubmed.ncbi.nlm.nih.gov/33060808/,
+#https://doi.org/10.1038/s41598-025-85622-x, DOI: 10.1002/cbic.201000510
 hma_lma_dict = {
-    "Coscinoderma": "HMA",
-    "Agelas": "HMA",
-    "Geodia": "HMA",
-    "Amphimedon": "LMA",
-    "Cinachyrella": "LMA",
-    "Niphates": "LMA",
-    "Mycale": "LMA",
-    "Spongilla": "LMA",
-    "Halichondria": "LMA",
-    "Haliclona": "LMA",
-    "Cliona": "LMA",
-    "Phyllospongia": "LMA",
-    "Rhopaloeides": "LMA", 
-    "Manihinea": "Unknown",
-    "Theonella": "HMA",
-    "Aiolochroia": "HMA",
-    "Pseudoceratina": "HMA",
-    "Xestospongia": "LMA",
-    "Aplysina": "HMA",
-    "Ircinia": "HMA",
-    "Ianthella": "LMA",
-    "Isodictya": "LMA",
-    "Ephydatia": "LMA",
-    "Pericharax": "Unknown",
-    "Cymbastela": "LMA",
-    "Lamellodysidea": "LMA",
-    
+    # HMA sponges
+    'Agelas':           'HMA',
+    'Aiolochroia':      'HMA',
+    'Aplysina':         'HMA',
+    'Chondrilla':       'HMA',
+    'Coscinoderma':     'HMA',
+    'Geodia':           'HMA',
+    'Ircinia':          'HMA',
+    'Petrosia':         'HMA',
+    'Pseudoceratina':   'HMA',
+    'Rhabdastrella':    'HMA',
+    'Sarcotragus':      'HMA',
+    'Smenospongia':     'HMA',
+    'Theonella':        'HMA',
+    'Thoosa':           'HMA',
+    'Verongula':        'HMA',
+
+    # LMA sponges
+    'Amphimedon':       'LMA',
+    'Axinella':         'LMA',
+    'Baikalospongia':   'LMA',
+    'Cinachyrella':     'LMA',
+    'Clathria':         'LMA',
+    'Cliona':           'LMA',
+    'Crella':           'LMA',
+    'Cymbastela':       'LMA',
+    'Dysidea':          'LMA',
+    'Ephydatia':        'LMA',
+    'Eunapius':         'LMA',
+    'Halichondria':     'LMA',
+    'Haliclona':        'LMA',
+    'Hymedesmia':       'LMA',
+    'Ianthella':        'LMA',
+    'Isodictya':        'LMA',
+    'Lamellodysidea':   'LMA',
+    'Leucetta':         'LMA',
+    'Mycale':           'LMA',
+    'Myxilla':          'LMA',
+    'Niphates':         'LMA',
+    'Phyllospongia':    'LMA',
+    'Rhopaloeides':     'LMA',
+    'Scopalina':        'LMA',
+    'Spheciospongia':   'LMA',
+    'Spongilla':        'LMA',
+    'Stylissa':         'LMA',
+    'Tedaniidae':       'LMA',
+    'Xestospongia':     'LMA',
+    'Pericharax':       'LMA',
+
+    # Unknown status
+    'Manihinea':        'N.D.',
+    'Haplosclerida':    'N.D.',
+    'Lophophysema':     'N.D.',
+    'Acarnus':          'N.D.',
+    'Not_Defined':      'N.D.',
 }
+
 
 # Extract genus from genus_with_count
 genus_base_names = [label.split(" (n=")[0] for label in relative_presence_matrix.columns]
@@ -579,7 +612,7 @@ genus_base_names = [label.split(" (n=")[0] for label in relative_presence_matrix
 hma_lma_colors = {
     "HMA": "darkgreen",
     "LMA": "orange",
-    "Unknown": "lightgrey"
+    "N.D.": "lightgrey"
 }
 
 hma_lma_labels = [hma_lma_dict.get(genus, "Unknown") for genus in genus_base_names]
@@ -587,7 +620,7 @@ col_colors = [hma_lma_colors.get(label, "lightgrey") for label in hma_lma_labels
 
 
 # Plot
-relative_presence_matrix.to_csv("C:/Users/hayat/Downloads/R_files/data/top_279_plasmid_relative_presence_matrix_filtered.csv")
+relative_presence_matrix.to_csv("C:/Users/hayat/Downloads/R_files/data/top_abundant_widespread_plasmid_relative_presence_matrix_filtered.csv")
 
 
 g = sns.clustermap(
@@ -619,7 +652,7 @@ g.ax_heatmap.tick_params(axis='y', which='both', length=0)
 g.ax_heatmap.set_yticklabels([])
 
 plt.suptitle(
-    "Clustered Relative Presence of Top 25% Abundant & Widespread Plasmids\nAcross Host Genera (>1 metagenome with plasmid)",
+    "Clustered Relative Presence of Top 10% Abundant & Widespread Plasmids\nAcross Host Genera (>1 metagenome with plasmid)",
     fontsize=18,
     y=1.05
 )
@@ -688,7 +721,7 @@ rpkm_with_genus = rpkm_with_genus.dropna(subset=["Type"])
 # plt.show()
 
 # mann-whitney-u test
-
+order = ["HMA", "LMA", "N.D."]
 
 hma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "HMA"]["Total_RPKM"]
 lma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "LMA"]["Total_RPKM"]
@@ -696,27 +729,31 @@ stat, p_value = mannwhitneyu(hma_data, lma_data, alternative="two-sided")
 
 plt.figure(figsize=(8, 5))
 
-# Basic boxplot
-sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", palette="Set2", showfliers=True)
+# Create the boxplot using the specified order
+sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM",
+            palette="Set2", showfliers=True, order=order)
 
 # Calculate means and medians
 grouped = rpkm_with_genus.groupby("Type")["Total_RPKM"]
 means = grouped.mean()
 medians = grouped.median()
 
-# Overlay mean and median markers
-for i, group in enumerate(means.index):
-    plt.scatter(i, means[group], color='blue', marker='D', label='Mean' if i == 0 else "", s=60, edgecolor='black', zorder=10)
-    plt.scatter(i, medians[group], color='red', marker='o', label='Median' if i == 0 else "", s=60, edgecolor='black', zorder=10)
+# Overlay mean and median markers with correct x positions
+for i, group in enumerate(order):
+    plt.scatter(i, means[group], color='blue', marker='D',
+                label='Mean' if i == 0 else "", s=60, edgecolor='black', zorder=10)
+    plt.scatter(i, medians[group], color='red', marker='o',
+                label='Median' if i == 0 else "", s=60, edgecolor='black', zorder=10)
 
 plt.yscale("log")
 plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
 plt.ylabel("Total RPKM (log scale)")
 plt.xlabel("Sponge Type")
 
-# Add legend for mean and median
+# Add legend only once
 plt.legend()
 
+# Annotate p-value
 x1, x2 = 0, 1
 y, h, col = rpkm_with_genus["Total_RPKM"].max() * 1.1, 0.2, 'k'
 plt.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
@@ -736,7 +773,6 @@ plt.text((x1 + x2) * 0.5, y + h + 0.05, p_text, ha='center', va='bottom', color=
 
 plt.tight_layout()
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_per_hma_lma.png", dpi=300)
-
 plt.show()
 
 # Calculate plasmid richness per metagenome (number of plasmids with RPKM ≥ 1)
@@ -758,25 +794,32 @@ lma_richness = richness_with_genus[richness_with_genus["Type"] == "LMA"]["Plasmi
 stat_rich, p_rich = mannwhitneyu(hma_richness, lma_richness, alternative="two-sided")
 
 
-sns.boxplot(data=richness_with_genus, x="Type", y="Plasmid_Richness", palette="Set2", showfliers=True)
+
+# Define the order explicitly
+
+
+# Create boxplot with defined order
+sns.boxplot(data=richness_with_genus, x="Type", y="Plasmid_Richness",
+            palette="Set2", showfliers=True, order=order)
 
 # Calculate means and medians
 grouped = richness_with_genus.groupby("Type")["Plasmid_Richness"]
 means = grouped.mean()
 medians = grouped.median()
 
-# Overlay mean and median markers
-for i, group in enumerate(means.index):
-    plt.scatter(i, means[group], color='blue', marker='D', label='Mean' if i == 0 else "", s=60, edgecolor='black', zorder=10)
-    plt.scatter(i, medians[group], color='red', marker='o', label='Median' if i == 0 else "", s=60, edgecolor='black', zorder=10)
+# Overlay mean and median markers using correct x-axis positions
+for i, group in enumerate(order):
+    plt.scatter(i, means[group], color='blue', marker='D', label='Mean' if i == 0 else "",
+                s=60, edgecolor='black', zorder=10)
+    plt.scatter(i, medians[group], color='red', marker='o', label='Median' if i == 0 else "",
+                s=60, edgecolor='black', zorder=10)
 
 plt.title("Plasmid Diversity per Metagenome by Sponge Type (HMA vs LMA)")
-plt.ylabel("Number of Distinct Plasmids (RPKM ≥ 1)")
+plt.ylabel("Plasmid Richness (RPKM ≥ 1)")
 plt.xlabel("Sponge Type")
 
 # Add legend for mean and median
 plt.legend()
-
 
 # Annotate p-value
 x1, x2 = 0, 1
@@ -799,8 +842,3 @@ plt.text((x1 + x2) * 0.5, y + h + 1, p_text, ha='center', va='bottom', color='k'
 
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.png", dpi=300)
 plt.show()
-
-# Summary statistics for plasmid richness by sponge type
-richness_summary = richness_with_genus.groupby("Type")["Plasmid_Richness"].describe()
-print("\nPlasmid Richness Summary by Sponge Type (HMA vs LMA):")
-print(richness_summary)

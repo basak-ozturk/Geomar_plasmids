@@ -1,10 +1,10 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
+
 
 input_tsv = "C:/Users/hayat/Downloads/R_files/data/top_widespread_plasmid_metadata.tsv"
 output_itol = "C:/Users/hayat/Downloads/R_files/data/itol_geo_cluster_symbols_extended.txt"
 
+# Load metadata
 df = pd.read_csv(input_tsv, sep="\t")
 
 if 'geo_cluster' not in df.columns:
@@ -13,19 +13,28 @@ if 'geo_cluster' not in df.columns:
 clusters = sorted(df['geo_cluster'].unique())
 n_clusters = len(clusters)
 
-cmap = plt.get_cmap('tab10')
-colors = [mcolors.rgb2hex(cmap(i % 10)) for i in range(n_clusters)]
+# Color Universal Design (colorblind-friendly) palette
+cud_colors = [
+    "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+    "#0072B2", "#D55E00", "#CC79A7", "#999999",
+    "#000000", "#999933"
+]
+
+colors = [cud_colors[i % len(cud_colors)] for i in range(n_clusters)]
 cluster_to_color = {c: colors[i] for i, c in enumerate(clusters)}
 
-shape_code = 4  
+# Parameters
+shape_code = 4  # Star
 size = 10
-border_color = "#000000"
-border_width = 1
+fill = 1        # 1 = filled
+position = 1    # Symbol position
 
+# Legend entries
 legend_labels = [f"Cluster {c}" for c in clusters]
 legend_shapes = [str(shape_code)] * n_clusters
 legend_colors = colors
 
+# Write iTOL file
 with open(output_itol, "w", encoding="utf-8", newline='') as f:
     f.write("DATASET_SYMBOL\n")
     f.write("SEPARATOR TAB\n")
@@ -42,6 +51,7 @@ with open(output_itol, "w", encoding="utf-8", newline='') as f:
         cluster = row['geo_cluster']
         color = cluster_to_color[cluster]
         label = f"Cluster {cluster}"
-        f.write(f"{plasmid}\t{shape_code}\t{size}\t{color}\t{border_color}\t{border_width}\t{label}\n")
+        # Write: ID, symbol, size, color, fill (1), position, label
+        f.write(f"{plasmid}\t{shape_code}\t{size}\t{color}\t{fill}\t{position}\t{label}\n")
 
-print(f"✅ Extended iTOL DATASET_SYMBOL file written to: {output_itol}")
+print(f"✅ iTOL symbol dataset saved: {output_itol}")

@@ -10,9 +10,10 @@ import numpy as np
 import scipy.stats as stats
 from statsmodels.stats.multitest import multipletests
 import matplotlib.pyplot as plt
-import os
+#import os
 import re
 from collections import defaultdict
+import seaborn as sns
 
 
 
@@ -48,6 +49,52 @@ def parse_kos(pathway_str):
             parsed.append((desc, ko))
 
     return parsed
+
+def combined_forest_plots(df, clusters, save_path):
+    # Set layout (2 rows, 3 columns for 5 clusters)
+    n = len(clusters)
+    ncols = 3
+    nrows = int(np.ceil(n / ncols))
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols * 6, nrows * 4), sharex=False)
+    axes = axes.flatten()
+
+    for idx, cluster_name in enumerate(clusters):
+        ax = axes[idx]
+        sub = df[(df['Cluster'] == cluster_name) & (df['AdjP'] < 0.05)].copy()
+        sub = sub[sub['a'] >= 10]
+        sub = sub.sort_values('AdjP').head(5).sort_values('OddsRatio')
+
+        if sub.empty:
+            ax.axis('off')
+            ax.set_title(f'{cluster_name} (no sig. pathways)')
+            continue
+
+        sub['Label'] = sub.apply(
+            lambda x: f"{x['Description'].strip()} ({x['KO']})" if x['Description'] else x['KO'],
+            axis=1
+        )
+
+        ax.errorbar(
+            sub['log2(OR)'], sub['Label'],
+            xerr=[sub['log2(OR)'] - sub['CI_lower'], sub['CI_upper'] - sub['log2(OR)']],
+            fmt='o', color='black', ecolor='gray', capsize=3
+        )
+        ax.axvline(0, color='red', linestyle='--')
+        ax.set_title(cluster_name)
+        ax.set_xlabel("log2(Odds Ratio)")
+        if idx % ncols == 0:
+            ax.set_ylabel("")  # Labels already shown
+
+    # Hide any unused subplots
+    for j in range(idx + 1, len(axes)):
+        axes[j].axis('off')
+
+    fig.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.show()
+    plt.close()
+
 
 
 # Create plasmid → list of (description, ko)
@@ -157,10 +204,62 @@ def forest_plot(df, cluster_name):
     plt.xlabel('log2(Odds Ratio)')
     plt.title(f'Top {len(sub)} Enriched KEGG Pathways in {cluster_name}')
     plt.tight_layout()
-    plt.savefig(f"C:/Users/hayat/Downloads/R_files/graphs/{cluster_name}_ko_forestplot.png")
+   # plt.savefig(f"C:/Users/hayat/Downloads/R_files/graphs/{cluster_name}_ko_forestplot.png")
     plt.show()
     plt.close()
 
+
+def unified_forest_plot(df, save_path):
+    top_combined = []
+
+    for cluster in df['Cluster'].unique():
+        sub = df[(df['Cluster'] == cluster) & (df['AdjP'] < 0.05) & (df['a'] >= 10)].copy()
+        sub = sub.sort_values('AdjP').head(5)  # Top 5
+        top_combined.append(sub)
+
+    combined_df = pd.concat(top_combined)
+
+    # Clean labels
+    combined_df['Label'] = combined_df.apply(
+        lambda x: f"{x['Description'].strip()} ({x['KO']})" if x['Description'] else x['KO'],
+        axis=1
+    )
+
+    # Sort by log2 OR for nicer display
+    combined_df = combined_df.sort_values('log2(OR)')
+
+    # Plot
+    plt.figure(figsize=(10, len(combined_df) * 0.5 + 2))
+    ax = plt.gca()
+
+    palette = sns.color_palette("Set2", n_colors=combined_df['Cluster'].nunique())
+    cluster_to_color = dict(zip(combined_df['Cluster'].unique(), palette))
+
+    for idx, row in combined_df.iterrows():
+        ax.errorbar(
+            row['log2(OR)'],
+            row['Label'],
+            xerr=[[row['log2(OR)'] - row['CI_lower']], [row['CI_upper'] - row['log2(OR)']]],
+            fmt='o',
+            color=cluster_to_color[row['Cluster']],
+            ecolor='gray',
+            capsize=3,
+            label=row['Cluster']
+        )
+
+    ax.axvline(0, color='red', linestyle='--')
+    ax.set_xlabel("log2(Odds Ratio)")
+    ax.set_title("Top Enriched KEGG Pathways by Cluster")
+    
+    # Custom legend without duplicates
+    handles, labels = ax.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    ax.legend(by_label.values(), by_label.keys(), title="Cluster")
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.show()
+    plt.close()
 
 
 for cluster in cluster_plasmids:
@@ -175,14 +274,24 @@ summary = (
     .apply(lambda df: df[['KO', 'Description', 'OddsRatio', 'AdjP']].sort_values('AdjP'))
 )
 
-summary.to_csv("C:/Users/hayat/Downloads/R_files/data/ko_enrichment_summary_significant.tsv", sep='\t')
+#summary.to_csv("C:/Users/hayat/Downloads/R_files/data/ko_enrichment_summary_significant.tsv", sep='\t')
 
-sig_dir = "C:/Users/hayat/Downloads/R_files/data/significant_kos_per_cluster"
-os.makedirs(sig_dir, exist_ok=True)
+#sig_dir = "C:/Users/hayat/Downloads/R_files/data/significant_kos_per_cluster"
+#os.makedirs(sig_dir, exist_ok=True)
 
-for cluster in results_df['Cluster'].unique():
-    sig = results_df[(results_df['Cluster'] == cluster) & (results_df['AdjP'] < 0.05)]
-    if not sig.empty:
-        sig.to_csv(f"{sig_dir}/{cluster}_significant.tsv", sep='\t', index=False)
+# for cluster in results_df['Cluster'].unique():
+#     sig = results_df[(results_df['Cluster'] == cluster) & (results_df['AdjP'] < 0.05)]
+#     if not sig.empty:
+#         sig.to_csv(f"{sig_dir}/{cluster}_significant.tsv", sep='\t', index=False)
 
+# combined_forest_plots(
+#     results_df,
+#     clusters=list(cluster_plasmids.keys()),
+#     #save_path="C:/Users/hayat/Downloads/R_files/graphs/combined_ko_forestplot_panel.png"
+# )
+
+unified_forest_plot(
+    results_df,
+    save_path="C:/Users/hayat/Downloads/R_files/graphs/unified_ko_forestplot.png"
+)
 

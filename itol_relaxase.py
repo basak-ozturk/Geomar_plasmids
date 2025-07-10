@@ -5,7 +5,7 @@ Created on Thu Jun 26 09:02:08 2025
 @author: hayat
 """
 
-with open("C:/Users/hayat/Downloads/R_files/data/widespread_plasmids_MobC_proteins.txt") as f:
+with open("C:/Users/hayat/Downloads/R_files/data/widespread_plasmids_relaxase_proteins.txt") as f:
     mob_ids = [line.strip().rsplit('_', 1)[0] for line in f]
 
 mob_plasmids = set(mob_ids)
@@ -19,27 +19,28 @@ with open(r"C:\Users\hayat\Downloads\R_files\data\top_abundant_and_widespread_pl
 output_lines = [
     "DATASET_COLORSTRIP",
     "SEPARATOR TAB",
-    "DATASET_LABEL\tMob",
+    "DATASET_LABEL\tRelaxase",
     "COLOR\t#000000",
-    "LEGEND_TITLE\tMob",
+    "LEGEND_TITLE\tRelaxase",
     "LEGEND_SHAPES\t1\t1",
-    "LEGEND_COLORS\t#351c75\t#f1c232",
-    "LEGEND_LABELS\tMob+\tMob-",
+    "LEGEND_COLORS\t#0072B2\t#E69F00",
+    "LEGEND_LABELS\tRelaxase+\tRelaxase-",
     "DATA"
 ]
 
-# Assign colors and labels
+# Assign colors and labels (colorblind-friendly)
 for plasmid in sorted(all_plasmids):
     if plasmid in mob_plasmids:
-        color = "#351c75"
-        label = "Mob+"
+        color = "#0072B2"  # blue
+        label = "Relaxase+"
     else:
-        color = "#f1c232"
-        label = "Mob-"
+        color = "#E69F00"  # orange
+        label = "Relaxase-"
     output_lines.append(f"{plasmid}\t{color}\t{label}")
 
 # Save to file
-with open(r"C:\Users\hayat\Downloads\R_files\data\itol_mob.txt", "w") as out:
+with open(r"C:\Users\hayat\Downloads\R_files\data\itol_relaxase.txt", "w") as out:
     out.write("\n".join(output_lines))
 
-print("iTOL file saved as 'itol_mob.txt'")
+print("iTOL file saved as 'itol_relaxase.txt'")
+
