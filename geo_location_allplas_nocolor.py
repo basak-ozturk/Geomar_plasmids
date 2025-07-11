@@ -67,7 +67,7 @@ fig = px.scatter_geo(final_df, lat='Latitude', lon='Longitude',
                      color_discrete_sequence=color_sequence)
 fig.update_traces(marker=dict(size=10, line=dict(width=0.5, color='black')))
 
-fig.write_html("C:/Users/hayat/Downloads/R_files/graphs/all_plasmid_map.html")
+#fig.write_html("C:/Users/hayat/Downloads/R_files/graphs/all_plasmid_map.html")
 
 
 final_df['Latitude_round'] = final_df['Latitude'].round(4)
@@ -77,33 +77,55 @@ final_df['Longitude_round'] = final_df['Longitude'].round(4)
 summary = final_df.groupby(['Latitude_round', 'Longitude_round']).agg({
     'Plasmid': pd.Series.nunique
 }).reset_index().rename(columns={'Plasmid': 'Plasmid_Count'})
-summary.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmid_density_summary.csv", index=False)
 
-#summary['Plasmid_Count_Scaled'] = summary['Plasmid_Count'] * 10  # Adjust this factor
+summary['Plasmid_Count_Scaled'] = summary['Plasmid_Count'] * 4  # Adjust this factor for ring size
 # Plot
 fig = px.scatter_geo(summary,
                      lat='Latitude_round',
                      lon='Longitude_round',
                      size='Plasmid_Count',
-                     color='Plasmid_Count',
-                     color_continuous_scale='Greys',
                      projection='natural earth',
-                     title='Unique Plasmids per Sampling Location',
-                     size_max=30)
+                     title='Unique Plasmids per Sampling Location')
 
-# Add outlines
-fig.update_traces(marker=dict(
-    line=dict(width=1, color='red')
-))
-
-# Layout and export
-fig.update_layout(
-    geo=dict(showland=True, landcolor="rgb(243, 243, 243)"),
-    margin={"r":0, "t":40, "l":0, "b":0},
-    legend_title_text="Plasmid Count"
+# Update trace: red open rings with larger size
+fig.update_traces(
+    marker=dict(
+        color='black',
+        line=dict(color='black', width=1),
+        symbol='circle-open'
+    ),
+    selector=dict(mode='markers')
 )
 
-fig.write_html("C:/Users/hayat/Downloads/R_files/graphs/all_plasmid_density_map.html")
+# Optional: scale marker sizes manually by multiplying values
+summary['Plasmid_Count_Scaled'] = summary['Plasmid_Count'] * 4  # Adjust this factor
+
+# Re-plot with scaled sizes
+fig = px.scatter_geo(summary,
+                     lat='Latitude_round',
+                     lon='Longitude_round',
+                     size='Plasmid_Count_Scaled',
+                     projection='natural earth',
+                     title='Unique Plasmids per Sampling Location')
+
+fig.update_traces(
+    marker=dict(
+        color='black',
+        line=dict(color='black', width=1),
+        symbol='circle-open'
+    ),
+    showlegend=False
+)
+
+# Clean up layout
+fig.update_layout(
+    geo=dict(showland=True, landcolor="rgb(243, 243, 243)"),
+    margin={"r":0,"t":40,"l":0,"b":0},
+    coloraxis_showscale=False  # hides the color bar
+)
+
+# Save
+fig.write_html("C:/Users/hayat/Downloads/R_files/graphs/all_plasmid_density_map_monochrome.html")
 
 
 # coords = final_df[['Latitude', 'Longitude']].values
