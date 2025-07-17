@@ -209,11 +209,16 @@ def forest_plot(df, cluster_name):
     plt.close()
 
 
+
 def unified_forest_plot(df, save_path):
     top_combined = []
 
-    for cluster in df['Cluster'].unique():
-        sub = df[(df['Cluster'] == cluster) & (df['AdjP'] < 0.05) & (df['a'] >= 10)].copy()
+    # Extract numeric cluster identifiers (e.g., from 'Cluster5' → 5)
+    df = df.copy()
+    df['ClusterNum'] = df['Cluster'].str.extract(r'(\d+)').astype(int)
+
+    for cluster in df['ClusterNum'].unique():
+        sub = df[(df['ClusterNum'] == cluster) & (df['AdjP'] < 0.05) & (df['a'] >= 10)].copy()
         sub = sub.sort_values('AdjP').head(5)  # Top 5
         top_combined.append(sub)
 
@@ -232,8 +237,14 @@ def unified_forest_plot(df, save_path):
     plt.figure(figsize=(10, len(combined_df) * 0.5 + 2))
     ax = plt.gca()
 
-    palette = sns.color_palette("Set2", n_colors=combined_df['Cluster'].nunique())
-    cluster_to_color = dict(zip(combined_df['Cluster'].unique(), palette))
+    # Custom cluster color mapping
+    cluster_to_color = {
+        1: "#2596be",
+        2: "#e89e14",
+        3: "#25be63",
+        4: "#e85b14",
+        5: "#ec75d8"
+    }
 
     for idx, row in combined_df.iterrows():
         ax.errorbar(
@@ -241,7 +252,7 @@ def unified_forest_plot(df, save_path):
             row['Label'],
             xerr=[[row['log2(OR)'] - row['CI_lower']], [row['CI_upper'] - row['log2(OR)']]],
             fmt='o',
-            color=cluster_to_color[row['Cluster']],
+            color=cluster_to_color.get(row['ClusterNum'], 'black'),  # fallback color if cluster not in map
             ecolor='gray',
             capsize=3,
             label=row['Cluster']
@@ -250,16 +261,23 @@ def unified_forest_plot(df, save_path):
     ax.axvline(0, color='red', linestyle='--')
     ax.set_xlabel("log2(Odds Ratio)")
     ax.set_title("Top Enriched KEGG Pathways by Cluster")
-    
+
     # Custom legend without duplicates
     handles, labels = ax.get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
-    ax.legend(by_label.values(), by_label.keys(), title="Cluster")
+    
+    # Sort by numeric cluster (assuming labels are like 'Cluster1', 'Cluster2', etc.)
+    sorted_items = sorted(by_label.items(), key=lambda x: int(str(x[0]).strip().replace("Cluster", "")))
+    sorted_labels, sorted_handles = zip(*sorted_items)
+    
+    ax.legend(sorted_handles, sorted_labels, title="Cluster")
+
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
     plt.show()
     plt.close()
+
 
 
 for cluster in cluster_plasmids:
