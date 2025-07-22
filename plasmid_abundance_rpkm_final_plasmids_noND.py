@@ -7,6 +7,8 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from matplotlib.patches import Patch
 from scipy.stats import mannwhitneyu
+from collections import defaultdict
+
 
 # Load your data
 df = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/CoverM_MAPPING_rpkm_Plasmid_Contigs_ouput.tsv", sep="\t", index_col=0)
@@ -502,7 +504,7 @@ genus_map = genus_map.rename(columns={"biome_genus": "Genus"})  # Optional renam
 genus_counts = genus_map["Genus"].value_counts()
 
 # Filter to keep only genera with more than 1 metagenome
-valid_genera = genus_counts[genus_counts > 1].index
+valid_genera = genus_counts[genus_counts > 5].index
 genus_map = genus_map[genus_map["Genus"].isin(valid_genera)]
 
 # Create genus_with_count column dynamically
@@ -567,6 +569,7 @@ hma_lma_dict = {
     'Verongula':        'HMA',
     'Rhopaloeides':     'HMA',
     'Xestospongia':     'HMA',
+    'Manihinea':        'HMA',
 
     # LMA sponges
     'Amphimedon':       'LMA',
@@ -598,13 +601,12 @@ hma_lma_dict = {
     'Tedaniidae':       'LMA',
     'Pericharax':       'LMA',
     'Lophophysema':     'LMA',
-    'Manihinea':        'LMA',
     'Haplosclerida':    'LMA',
 
     # Unknown status
      
     'Acarnus':          'N.D.',
-    'Not_Defined':      'N.D.',
+    'Not_Defined':      'N.D.'
 }
 
 
@@ -616,7 +618,14 @@ hma_lma_colors = {
     "LMA": "orange",
     "N.D.": "lightgrey"
 }
+filtered_columns = [
+    col for col, genus in zip(relative_presence_matrix.columns, genus_base_names)
+    if hma_lma_dict.get(genus) != "N.D."
+]
 
+relative_presence_matrix = relative_presence_matrix[filtered_columns]
+
+genus_base_names = [label.split(" (n=")[0] for label in filtered_columns]
 hma_lma_labels = [hma_lma_dict.get(genus, "Unknown") for genus in genus_base_names]
 col_colors = [hma_lma_colors.get(label, "lightgrey") for label in hma_lma_labels]
 
@@ -659,8 +668,11 @@ plt.suptitle(
     y=1.05
 )
 legend_handles = [
-    Patch(color=color, label=label) for label, color in hma_lma_colors.items()
+    Patch(color=color, label=label)
+    for label, color in hma_lma_colors.items()
+    if label != "N.D."
 ]
+
 
 g.ax_col_dendrogram.legend(
     handles=legend_handles,
@@ -679,7 +691,6 @@ plt.show()
 metagenome_to_genus = host_info.set_index("Run")["biome_genus"].to_dict()
 
 # Create a mapping from genus to list of metagenomes
-from collections import defaultdict
 genus_to_metagenomes = defaultdict(list)
 for metagenome, genus in metagenome_to_genus.items():
     if genus:  # Skip NaN or None
@@ -709,6 +720,10 @@ rpkm_with_genus["Type"] = rpkm_with_genus["biome_genus"].map(hma_lma_dict)
 
 rpkm_with_genus = rpkm_with_genus.dropna(subset=["Type"])
 
+# Remove "N.D." from the type column
+rpkm_with_genus = rpkm_with_genus[rpkm_with_genus["Type"].isin(["HMA", "LMA"])]
+
+
 # plt.figure(figsize=(8, 5))
 # sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM", palette="Set2")
 # plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
@@ -723,7 +738,7 @@ rpkm_with_genus = rpkm_with_genus.dropna(subset=["Type"])
 # plt.show()
 
 # mann-whitney-u test
-order = ["HMA", "LMA", "N.D."]
+order = ["HMA", "LMA"]
 
 hma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "HMA"]["Total_RPKM"]
 lma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "LMA"]["Total_RPKM"]
@@ -789,6 +804,7 @@ richness_with_genus["Type"] = richness_with_genus["biome_genus"].map(hma_lma_dic
 
 # Drop rows with unknown or missing type
 richness_with_genus = richness_with_genus.dropna(subset=["Type"])
+richness_with_genus = richness_with_genus[richness_with_genus["Type"].isin(["HMA", "LMA"])]
 
 # Mann-Whitney U test
 hma_richness = richness_with_genus[richness_with_genus["Type"] == "HMA"]["Plasmid_Richness"]

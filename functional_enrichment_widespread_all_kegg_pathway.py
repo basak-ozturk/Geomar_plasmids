@@ -10,6 +10,7 @@ from scipy.stats import fisher_exact
 from statsmodels.stats.multitest import multipletests
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 # --- Helper functions ---
 
@@ -37,8 +38,9 @@ def unify_kegg_id(kegg_id):
 # --- Load data ---
 
 # Load plasmid list
-with open("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmid_names.csv") as f:
-    plasmids = set(line.strip() for line in f if line.strip())
+Geodia_plasmid_file = "C:/Users/hayat/Downloads/R_files/data/plasmids_in_Agelas.tsv"
+Geodia_df = pd.read_csv(Geodia_plasmid_file, sep="\t")
+plasmids = set(Geodia_df.iloc[:, 0])  # First column assumed to be plasmid names
 
 # Find header line in eggNOG annotations
 with open("C:/Users/hayat/Downloads/R_files/data/eggnog_output.emapper.annotations") as f:
@@ -116,7 +118,7 @@ enrichment_df["P_Value_Adjusted"] = multipletests(enrichment_df["P_Value"], meth
 # Filter significant terms with thresholds
 significance_threshold = 0.05
 odds_ratio_threshold = 1.0
-min_fg_count = 10
+min_fg_count = 20
 
 significant_filtered = enrichment_df[
     (enrichment_df["P_Value_Adjusted"] < significance_threshold) &
@@ -138,41 +140,86 @@ print("\nSignificant enriched KEGG pathways:")
 for _, row in significant_filtered.iterrows():
     print(f"{row['KEGG_Pathway']}: Adj P={row['P_Value_Adjusted']:.3e}, OR={row['Odds_Ratio']:.2f}, FG={row['Foreground_Count']}, BG={row['Background_Count']}")
 
-# --- Visualization ---
 
-plt.figure(figsize=(12, 8))
-sns.set(style="whitegrid")
+# --- Add log2(OR) and 95% CI to the DataFrame ---
 
-barplot = sns.barplot(
-    x="Odds_Ratio",
-    y="KEGG_Pathway",
-    data=significant_filtered,
-    palette="viridis"
+def compute_log2_ci(row):
+    a = row["Foreground_Count"]
+    b = fg_total - a
+    c = row["Background_Count"]
+    d = bg_total - c
+
+    # Avoid zero counts for stability
+    a = max(a, 1)
+    b = max(b, 1)
+    c = max(c, 1)
+    d = max(d, 1)
+
+    log_or = np.log2(row["Odds_Ratio"])
+    se = np.sqrt(1/a + 1/b + 1/c + 1/d) / np.log(2)  # convert SE to log2 scale
+    ci_lower = log_or - 1.96 * se
+    ci_upper = log_or + 1.96 * se
+    return pd.Series([log_or, ci_lower, ci_upper])
+
+significant_filtered[["log2_OR", "log2_CI_Lower", "log2_CI_Upper"]] = significant_filtered.apply(compute_log2_ci, axis=1)
+
+# --- Forest plot ---
+
+# Load annotation CSV
+annotations = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/agelas_enriched_pathways_annotations.csv", header=None, names=["ID", "Label"])
+
+# Remove whitespace
+annotations["ID"] = annotations["ID"].str.strip()
+annotations["Label"] = annotations["Label"].str.strip()
+
+# Merge with the main dataframe
+significant_filtered = significant_filtered.merge(
+    annotations,
+    left_on="KEGG_Pathway",
+    right_on="ID",
+    how="left"
 )
 
-plt.xlabel("Odds Ratio", fontsize=14)
-plt.ylabel("KEGG Pathway", fontsize=14)
-plt.title("Significant Enriched KEGG Pathways", fontsize=16)
+significant_filtered["Y_Label"] = significant_filtered.apply(
+    lambda row: f"{row['Label']} ({row['KEGG_Pathway']})" if pd.notna(row["Label"]) else row["KEGG_Pathway"],
+    axis=1
+)
 
-# Annotate bars with odds ratio values
-for p in barplot.patches:
-    width = p.get_width()
-    barplot.text(
-        width + 0.1,
-        p.get_y() + p.get_height() / 2,
-        f"{width:.2f}",
-        ha="left",
-        va="center",
-        fontsize=10,
-        color="black"
-    )
+# Sort for better layout
+significant_filtered = significant_filtered.sort_values("log2_OR", ascending=True)
+
+plt.figure(figsize=(10, 8))
+sns.set(style="whitegrid")
+
+plt.errorbar(
+    x=significant_filtered["log2_OR"],
+    y=significant_filtered["Y_Label"],
+    xerr=[
+        significant_filtered["log2_OR"] - significant_filtered["log2_CI_Lower"],
+        significant_filtered["log2_CI_Upper"] - significant_filtered["log2_OR"]
+    ],
+    fmt='o',
+    color='black',
+    ecolor='gray',
+    elinewidth=2,
+    capsize=4
+)
+
+plt.axvline(0, color='red', linestyle='--', label='OR = 1')
+plt.xlabel(r'$\log_2(\mathrm{Odds\ Ratio})$', fontsize=12)
+plt.ylabel("Pathway", fontsize=12)
+plt.title(r'Pathway Enrichment in Agelas Plasmids' + '\n' +
+          r'$\left(\log_2(\mathrm{Odds\ Ratio\ with\ 95\%\ CI})\right)$')
 
 plt.tight_layout()
+plt.legend()
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/agelas_enriched_pathways_OR_with_CI.png", dpi=300)
 plt.show()
+
 
 # Save filtered significant enrichment results
 significant_filtered.to_csv(
-    "C:/Users/hayat/Downloads/R_files/data/enriched_KEGG_Pathways_all_widespread_significant.tsv",
+    "C:/Users/hayat/Downloads/R_files/data/enriched_KEGG_Pathways_Agelas.tsv",
     sep="\t",
     index=False
 )

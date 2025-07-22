@@ -124,7 +124,7 @@ location_counts = (
 )
 
 # === Plot pie charts for multi-plasmid locations ===
-filtered_locations = location_counts[location_counts["Plasmid_Count"] > 1]
+filtered_locations = location_counts[location_counts["Plasmid_Count"] >= 1]
 cols = 5
 rows = (len(filtered_locations) + cols - 1) // cols
 fig_pies, axes = plt.subplots(rows, cols, figsize=(cols*3, rows*3), subplot_kw=dict(aspect="equal"))
@@ -159,7 +159,7 @@ for j in range(len(filtered_locations), len(axes)):
     axes[j].axis('off')
 
 plt.tight_layout()
-pie_svg_path = os.path.join(output_folder, "cluster_composition_piecharts.svg")
+pie_svg_path = os.path.join(output_folder, "cluster_composition_piecharts_all.svg")
 fig_pies.savefig(pie_svg_path)
 plt.close(fig_pies)
 print(f"Pie charts saved as SVG: {pie_svg_path}")
