@@ -795,7 +795,13 @@ hma_richness = richness_with_genus[richness_with_genus["Type"] == "HMA"]["Plasmi
 lma_richness = richness_with_genus[richness_with_genus["Type"] == "LMA"]["Plasmid_Richness"]
 stat_rich, p_rich = mannwhitneyu(hma_richness, lma_richness, alternative="two-sided")
 
-
+# Prepare summary data for Total_RPKM
+summary_rpkm = pd.DataFrame({
+    "Type": order,
+    "Mean_Total_RPKM": [means[group] for group in order],
+    "Median_Total_RPKM": [medians[group] for group in order],
+    "P_Value_Total_RPKM": [p_value] + [None] * (len(order) - 1)
+})
 
 # Define the order explicitly
 
@@ -844,3 +850,20 @@ plt.text((x1 + x2) * 0.5, y + h + 1, p_text, ha='center', va='bottom', color='k'
 
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.png", dpi=300)
 plt.show()
+
+
+
+
+# Prepare summary data for Plasmid_Richness
+summary_richness = pd.DataFrame({
+    "Type": order,
+    "Mean_Plasmid_Richness": [grouped.mean()[group] for group in order],
+    "Median_Plasmid_Richness": [grouped.median()[group] for group in order],
+    "P_Value_Plasmid_Richness": [p_rich] + [None] * (len(order) - 1)
+})
+
+# Merge both summaries on "Type"
+summary_all = pd.merge(summary_rpkm, summary_richness, on="Type")
+
+# Save as CSV and TSV
+summary_all.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmid_rpkm_richness_summary.csv", index=False)
