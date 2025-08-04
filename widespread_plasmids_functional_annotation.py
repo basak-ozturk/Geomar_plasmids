@@ -32,6 +32,22 @@ top_pfam_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_pfam_for_curation.
 top_pfam_df_curated = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/top_pfam_for_curation_curated_consolidated.csv")
 top_pfam_df_curated = top_pfam_df_curated.sort_values("Count", ascending=False)
 
+category_palette = {
+    "Toxin-antitoxin": "#D55E00",               # reddish-orange
+    "Oxidoreductase": "#0072B2",                # blue
+    "Signalling": "#009E73",                    # bluish green
+    "Broad/uncharacterized function": "#999999",# gray
+    "Restriction-DNA modification": "#E69F00",  # orange
+    "Conjugation": "#56B4E9",                   # light blue
+    "Transposase": "#F0E442",                   # yellow
+    "Integrase": "#CC79A7",                     # magenta
+    "Regulatory protein": "#882255",            # deep burgundy
+    "Transporter": "#44AA99",                   # teal
+    "Secretion system": "#117733"               # dark green
+}
+
+
+
 # PFAM plot
 plt.figure(figsize=(14, 10))
 sns.set_style("whitegrid")
@@ -41,7 +57,8 @@ ax = sns.barplot(
     y="PFAM", x="Count",
     hue="Category",
     dodge=False,
-    palette="Paired"
+    palette=category_palette
+
 )
 
 plt.title("Top PFAM Domains in Widespread Plasmid Proteins (Categorized)", fontsize=16)

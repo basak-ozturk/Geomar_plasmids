@@ -740,6 +740,7 @@ grouped = rpkm_with_genus.groupby("Type")["Total_RPKM"]
 means = grouped.mean()
 medians = grouped.median()
 
+
 # Overlay mean and median markers with correct x positions
 for i, group in enumerate(order):
     plt.scatter(i, means[group], color='blue', marker='D',

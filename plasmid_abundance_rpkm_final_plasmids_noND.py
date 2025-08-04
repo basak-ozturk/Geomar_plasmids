@@ -58,7 +58,8 @@ log_values = np.log10(nonzero_values + 1)
 
 # plt.show()
 
-min_presence = int(0.01 * df.shape[1])  #optional filtering to get rid of some of the data sparsity
+#min_presence = int(0.01 * df.shape[1])  #optional filtering to get rid of some of the data sparsity
+min_presence = 0
 presence = df >= 1
 filtered_df = df[presence.sum(axis=1) >= min_presence]
 # Drop metagenomes that have only zeros after plasmid filtering
@@ -86,20 +87,20 @@ melted_df_nonzero = melted_df[melted_df["RPKM"] > 0]
 # plt.tight_layout()
 # plt.show()
 
-# Plot top N ranked RPKMs for each metagenome
-plt.figure(figsize=(10, 6))
+# # Plot top N ranked RPKMs for each metagenome
+# plt.figure(figsize=(10, 6))
 
-for sample in filtered_df.index:
-    sorted_rpkm = np.sort(filtered_df.loc[sample])[::-1]  # sort descending
-    plt.plot(range(1, len(sorted_rpkm)+1), sorted_rpkm, label=sample)
+# for sample in filtered_df.index:
+#     sorted_rpkm = np.sort(filtered_df.loc[sample])[::-1]  # sort descending
+#     plt.plot(range(1, len(sorted_rpkm)+1), sorted_rpkm, label=sample)
 
-plt.yscale('log')
-plt.xlabel('Plasmid Rank (1 = most abundant)')
-plt.ylabel('RPKM')
-plt.title('Ranked Plasmid Abundance per Metagenome')
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.tight_layout()
-plt.show()
+# plt.yscale('log')
+# plt.xlabel('Plasmid Rank (1 = most abundant)')
+# plt.ylabel('RPKM')
+# plt.title('Ranked Plasmid Abundance per Metagenome')
+# plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+# plt.tight_layout()
+# plt.show()
 
 binary_matrix = (filtered_df >= 1).astype(int)
 
@@ -107,33 +108,33 @@ binary_matrix = (filtered_df >= 1).astype(int)
 pca = PCA(n_components=2)
 coords = pca.fit_transform(binary_matrix.values)
 
-plt.figure(figsize=(8, 6))
-plt.scatter(coords[:, 0], coords[:, 1], alpha=0.5, s=10)
-plt.title("PCA of plasmid presence across metagenomes")
-plt.xlabel("PC1")
-plt.ylabel("PC2")
-plt.tight_layout()
-plt.show()
+# plt.figure(figsize=(8, 6))
+# plt.scatter(coords[:, 0], coords[:, 1], alpha=0.5, s=10)
+# plt.title("PCA of plasmid presence across metagenomes")
+# plt.xlabel("PC1")
+# plt.ylabel("PC2")
+# plt.tight_layout()
+# plt.show()
 
-explained_variance = pca.explained_variance_ratio_
-for i, var in enumerate(explained_variance, 1):
-    print(f"PC{i} explains {var:.2%} of the variance")
+# explained_variance = pca.explained_variance_ratio_
+# for i, var in enumerate(explained_variance, 1):
+#     print(f"PC{i} explains {var:.2%} of the variance")
 
 kmeans = KMeans(n_clusters=2, random_state=42)
 clusters = kmeans.fit_predict(coords)  # coords = pca-transformed data
 
-plt.figure(figsize=(8, 6))
-scatter = plt.scatter(coords[:, 0], coords[:, 1], c=clusters, cmap='Set1', s=20, alpha=0.7)
+# plt.figure(figsize=(8, 6))
+# scatter = plt.scatter(coords[:, 0], coords[:, 1], c=clusters, cmap='Set1', s=20, alpha=0.7)
 
-plt.xlabel(f"PC1 ({explained_variance[0]:.1%} variance explained)")
-plt.ylabel(f"PC2 ({explained_variance[1]:.1%} variance explained)")
-plt.title("KMeans Clustering on PCA of Plasmid Presence Across Metagenomes")
-#plt.colorbar(scatter, label='Cluster')
-plt.tight_layout()
+# plt.xlabel(f"PC1 ({explained_variance[0]:.1%} variance explained)")
+# plt.ylabel(f"PC2 ({explained_variance[1]:.1%} variance explained)")
+# plt.title("KMeans Clustering on PCA of Plasmid Presence Across Metagenomes")
+# #plt.colorbar(scatter, label='Cluster')
+# plt.tight_layout()
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/PCA_plasmid_abundance_final_plasmids.png", dpi=300, bbox_inches="tight")
+# #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/PCA_plasmid_abundance_final_plasmids.png", dpi=300, bbox_inches="tight")
 
-plt.show()
+# plt.show()
 
 # Add cluster labels to the binary matrix
 clustered_df = binary_matrix.copy()
@@ -141,29 +142,29 @@ clustered_df["cluster"] = clusters
 
 clustered_df["metagenome_presence_count"] = clustered_df.drop(columns="cluster").sum(axis=1)
 
-sns.boxplot(x="cluster", y="metagenome_presence_count", data=clustered_df.reset_index())
-plt.title("Plasmid Presence Across Metagenomes by Cluster")
-plt.ylabel("Number of Metagenomes where Plasmid is Present")
-plt.xlabel("KMeans Cluster")
-plt.show()
+#sns.boxplot(x="cluster", y="metagenome_presence_count", data=clustered_df.reset_index())
+#plt.title("Plasmid Presence Across Metagenomes by Cluster")
+#plt.ylabel("Number of Metagenomes where Plasmid is Present")
+#plt.xlabel("KMeans Cluster")
+#plt.show()
 
 summary = clustered_df.groupby("cluster")["metagenome_presence_count"].describe()
-print(summary)
+#print(summary)
 
 mean_profiles = clustered_df.groupby("cluster").mean(numeric_only=True).drop(columns=["metagenome_presence_count"])
 
-plt.figure(figsize=(14, 6))  # Set the figure size here
-sns.heatmap(mean_profiles.T, cmap="viridis")
-plt.title("Average presence of each cluster across metagenomes")
-plt.xlabel("Cluster")
-plt.ylabel("Metagenome")
-plt.yticks([])
+# plt.figure(figsize=(14, 6))  # Set the figure size here
+# sns.heatmap(mean_profiles.T, cmap="viridis")
+# plt.title("Average presence of each cluster across metagenomes")
+# plt.xlabel("Cluster")
+# plt.ylabel("Metagenome")
+# plt.yticks([])
 
-plt.tight_layout()
+# plt.tight_layout()
 
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_presence_across_metagenomes_final_plasmids.png", dpi=300, bbox_inches="tight")
+# #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_presence_across_metagenomes_final_plasmids.png", dpi=300, bbox_inches="tight")
 
-plt.show()
+# plt.show()
 
 # Add a column that counts presence across metagenomes
 clustered_df["metagenome_presence_count"] = (clustered_df.drop(columns=["cluster"]) > 0).sum(axis=1)
@@ -371,12 +372,18 @@ plt.show()
 # Most widespread plasmids
 
 # Compute presence (number of metagenomes with RPKM ≥ 1)
-binary_matrix = (filtered_df >= 1).astype(int)
+min_presence = int(0.01 * df.shape[1])
+filtered_df_1 = df[presence.sum(axis=1) >= min_presence]
+metagenome_presence_count = filtered_df_1.gt(0).sum(axis=1)
+
+total_abundance = filtered_df_1.sum(axis=1)
+
+binary_matrix = (filtered_df_1 >= 1).astype(int)
 presence_counts = binary_matrix.sum(axis=1)
 
 # Compute total and mean abundance
-total_abundance = filtered_df.sum(axis=1)
-mean_abundance = filtered_df.replace(0, np.nan).mean(axis=1)
+total_abundance = filtered_df_1.sum(axis=1)
+mean_abundance = filtered_df_1.replace(0, np.nan).mean(axis=1)
 
 # Define 90th percentiles (top 10%)
 presence_thresh = presence_counts.quantile(0.90)
@@ -394,8 +401,8 @@ top_both = widespread_set & abundant_set
 print(f"{len(top_both)} plasmids are both highly widespread and abundant (top 10%).")
 
 # Save to file
-# filtered_df.loc[list(top_both)].to_csv(
-#     "C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmids.csv"
+#filtered_df.loc[list(top_both)].to_csv(
+#   "C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmids.csv"
 # )
 # Restrict to top abundant and widespread plasmids
 top_df = filtered_df.loc[list(top_both)]
@@ -439,20 +446,20 @@ top5_widespread = presence_counts.sort_values(ascending=False).head(5)
 
 
 # Plot
+
+# For plotting: use filtered_df_1.index as base
+colors = ['blue' if idx in top_both else 'gray' for idx in filtered_df_1.index]
+sizes = [60 if idx in top_both else 20 for idx in filtered_df_1.index]
+
 plt.figure(figsize=(10, 7))
-
-# Prepare color and size based on category
-colors = ['blue' if idx in top_both else 'gray' for idx in clustered_df.index]
-sizes = [50 if idx in top_both else 15 for idx in clustered_df.index]
-
 plt.scatter(
-    clustered_df["metagenome_presence_count"],
-    total_abundance[clustered_df.index] + 1e-3,  # Avoid log(0)
+    metagenome_presence_count,
+    total_abundance + 1e-3,  # to avoid log(0)
     c=colors,
     s=sizes,
-    alpha=0.6,
+    alpha=0.7,
     edgecolor='k',
-    linewidth=0.2
+    linewidth=0.3
 )
 
 # Add threshold lines
@@ -489,6 +496,7 @@ plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.3)
 plt.tight_layout()
 #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_vs_abundance_highlighted_final_plasmids.png", dpi=300)
 plt.show()
+
 # Distribution of top widespread and abundant plasmids across host genera
 # Save plasmid IDs to a text file
 # with open("C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_plasmid_names.txt", "w") as f:
@@ -496,7 +504,7 @@ plt.show()
 #         f.write(plasmid_id + "\n")
 
 # Filter to top_both plasmids
-top_both_df = filtered_df.loc[filtered_df.index.intersection(top_both)]
+top_both_df = filtered_df_1.loc[filtered_df.index.intersection(top_both)]
 
 # Count number of metagenomes per genus
 genus_map = merged_df[["Metagenome", "biome_genus"]].copy()
@@ -744,6 +752,8 @@ hma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "HMA"]["Total_RPKM"]
 lma_data = rpkm_with_genus[rpkm_with_genus["Type"] == "LMA"]["Total_RPKM"]
 stat, p_value = mannwhitneyu(hma_data, lma_data, alternative="two-sided")
 
+
+
 plt.figure(figsize=(8, 5))
 
 # Create the boxplot using the specified order
@@ -754,6 +764,14 @@ sns.boxplot(data=rpkm_with_genus, x="Type", y="Total_RPKM",
 grouped = rpkm_with_genus.groupby("Type")["Total_RPKM"]
 means = grouped.mean()
 medians = grouped.median()
+
+# Prepare summary data for Total_RPKM
+summary_rpkm = pd.DataFrame({
+    "Type": order,
+    "Mean_Total_RPKM": [means[group] for group in order],
+    "Median_Total_RPKM": [medians[group] for group in order],
+    "P_Value_Total_RPKM": [p_value] + [None] * (len(order) - 1)
+})
 
 # Overlay mean and median markers with correct x positions
 for i, group in enumerate(order):
@@ -825,6 +843,14 @@ grouped = richness_with_genus.groupby("Type")["Plasmid_Richness"]
 means = grouped.mean()
 medians = grouped.median()
 
+# Prepare summary data for Plasmid_Richness
+summary_richness = pd.DataFrame({
+    "Type": order,
+    "Mean_Plasmid_Richness": [grouped.mean()[group] for group in order],
+    "Median_Plasmid_Richness": [grouped.median()[group] for group in order],
+    "P_Value_Plasmid_Richness": [p_rich] + [None] * (len(order) - 1)
+})
+
 # Overlay mean and median markers using correct x-axis positions
 for i, group in enumerate(order):
     plt.scatter(i, means[group], color='blue', marker='D', label='Mean' if i == 0 else "",
@@ -860,3 +886,18 @@ plt.text((x1 + x2) * 0.5, y + h + 1, p_text, ha='center', va='bottom', color='k'
 
 plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.png", dpi=300)
 plt.show()
+
+
+# Prepare summary data for Plasmid_Richness
+summary_richness = pd.DataFrame({
+    "Type": order,
+    "Mean_Plasmid_Richness": [grouped.mean()[group] for group in order],
+    "Median_Plasmid_Richness": [grouped.median()[group] for group in order],
+    "P_Value_Plasmid_Richness": [p_rich] + [None] * (len(order) - 1)
+})
+
+# Merge both summaries on "Type"
+summary_all = pd.merge(summary_rpkm, summary_richness, on="Type")
+
+# Save as CSV and TSV
+summary_all.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmid_rpkm_richness_summary.csv", index=False)

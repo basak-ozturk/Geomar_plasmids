@@ -40,13 +40,31 @@ with open(input_file, "r") as f:
 
 # PFAM counts → DataFrame
 top_pfam_df = pd.DataFrame(pfam_counter.most_common(100), columns=["PFAM", "Count"])
-top_pfam_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_100_pfams_in_all_annotations.csv", index=False)
+top_pfam_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_50_pfams_in_all_annotations.csv", index=False)
 
-print("Top 100 PFAMs written to CSV.")
+print("Top 50 PFAMs written to CSV.")
 
 # Plot curated PFAM
 top_pfam_df_curated = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/top_pfam_all_plasmids_for_curation_curated_consolidated.csv")
 top_pfam_df_curated = top_pfam_df_curated.sort_values("Count", ascending=False)
+
+category_palette = {
+    "Toxin-antitoxin": "#D55E00",               # reddish-orange
+    "Oxidoreductase": "#0072B2",                # blue
+    "Signalling": "#009E73",                    # bluish green
+    "Broad/uncharacterized function": "#999999",# gray
+    "Restriction-DNA modification": "#E69F00",  # orange
+    "Conjugation": "#56B4E9",                   # light blue
+    "Transposase": "#F0E442",                   # yellow
+    "Integrase": "#CC79A7",                     # magenta
+    "Regulatory protein": "#882255",            # deep burgundy
+    "Transporter": "#44AA99",                   # teal
+    "Secretion system": "#117733",               # dark green
+    "Peptidase": "#AA4499"  # deep violet / plum
+
+}
+
+
 
 plt.figure(figsize=(14, 10))
 sns.set_style("whitegrid")
@@ -56,7 +74,8 @@ ax = sns.barplot(
     y="PFAM", x="Count",
     hue="Category",
     dodge=False,
-    palette="Paired"
+    palette=category_palette
+
 )
 
 plt.title("Top PFAM Domains in All Plasmid Proteins (Categorized)", fontsize=16)
@@ -107,5 +126,5 @@ plt.xlabel("Number of Proteins")
 plt.ylabel("COG Functional Category")
 plt.title("COG Categories in All Plasmid Proteins")
 plt.tight_layout()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/all_plasmids_cog_category_plot_filtered.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/all_plasmids_cog_category_plot_filtered.png", dpi=300)
 plt.show()

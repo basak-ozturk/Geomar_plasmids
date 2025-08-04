@@ -18,7 +18,7 @@ mapping_df = pd.read_csv(mapping_file, sep='\t', index_col=0)
 meta_df = pd.read_csv(metadata_file, sep='\t')
 
 # Target biome genera
-target_genera = ["Geodia", "Agelas", "Aplysina"]
+target_genera = ["Aplysina"]
 
 # Process each genus
 for genus in target_genera:
@@ -50,5 +50,5 @@ for genus in target_genera:
 
     # Step 5: Save
     output_filename = f"C:/Users/hayat/Downloads/R_files/data/plasmids_in_{genus}.tsv"
-    output_df.to_csv(output_filename, sep="\t", index=False)
+    #output_df.to_csv(output_filename, sep="\t", index=False)
     print(f"Saved: {output_filename}")
