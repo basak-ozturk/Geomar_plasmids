@@ -40,7 +40,7 @@ with open(input_file, "r") as f:
 
 # PFAM counts → DataFrame
 top_pfam_df = pd.DataFrame(pfam_counter.most_common(100), columns=["PFAM", "Count"])
-top_pfam_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_50_pfams_in_all_annotations.csv", index=False)
+#top_pfam_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_50_pfams_in_all_annotations.csv", index=False)
 
 print("Top 50 PFAMs written to CSV.")
 
@@ -84,7 +84,9 @@ plt.ylabel("PFAM", fontsize=12)
 plt.yticks(fontsize=8)
 plt.legend(title="Category", bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/all_plasmids_top_pfam_plot_categorized.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/all_plasmids_top_pfam_plot_categorized.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/all_plasmids_top_pfam_plot_categorized.svg", dpi=300)
+
 plt.show()
 
 # COG counts → DataFrame
@@ -127,4 +129,6 @@ plt.ylabel("COG Functional Category")
 plt.title("COG Categories in All Plasmid Proteins")
 plt.tight_layout()
 #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/all_plasmids_cog_category_plot_filtered.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/all_plasmids_cog_category_plot_filtered.svg", dpi=300)
+
 plt.show()

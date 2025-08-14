@@ -26,7 +26,7 @@ pfam_counts.columns = ["PFAM", "Count"]
 # Top PFAMs
 top_n = 50
 top_pfam_df = pfam_counts.head(top_n)
-top_pfam_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_pfam_for_curation.csv", index=False)
+#top_pfam_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_pfam_for_curation.csv", index=False)
 
 # Load curated PFAM categories
 top_pfam_df_curated = pd.read_csv("C:/Users/hayat/Downloads/R_files/data/top_pfam_for_curation_curated_consolidated.csv")
@@ -67,7 +67,9 @@ plt.ylabel("PFAM", fontsize=12)
 plt.yticks(fontsize=8)
 plt.legend(title="Category", bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_plasmids_top_pfam_plot_categorized.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_plasmids_top_pfam_plot_categorized.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_plasmids_top_pfam_plot_categorized.svg")
+
 plt.show()
 
 # COG processing
@@ -112,5 +114,7 @@ plt.xlabel("Number of Proteins")
 plt.ylabel("COG Functional Category")
 plt.title("COG Categories in Widespread Plasmid Proteins")
 plt.tight_layout()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_plasmids_cog_category_plot_filtered.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_plasmids_cog_category_plot_filtered.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_plasmids_cog_category_plot_filtered.svg")
+
 plt.show()

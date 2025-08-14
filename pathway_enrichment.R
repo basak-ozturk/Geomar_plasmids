@@ -37,4 +37,4 @@ ggplot(data_expanded, aes(x = log10(Count), y = reorder(Pathways, Count), size =
 
 # Save correctly formatted plot
 ggsave("C:/Users/hayat/Downloads/R_files/graphs/KEGG_Pathway_BubblePlot_with_names.png", width = 10, height = 8, dpi = 300, bg = "white")
-ggsave("C:/Users/hayat/Downloads/R_files/graphs/KEGG_Pathway_BubblePlot_with_names.pdf", width = 10, height = 8, bg = "white")
+ggsave("C:/Users/hayat/Downloads/R_files/graphs/KEGG_Pathway_BubblePlot_with_names.svg", width = 10, height = 8, bg = "white")

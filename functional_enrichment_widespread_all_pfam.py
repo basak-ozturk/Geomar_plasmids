@@ -176,16 +176,18 @@ plt.title(r'PFAM Enrichment in Abundant and Widespread Plasmids' + '\n' +
 
 plt.tight_layout()
 plt.legend()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/enriched_PFAMs_OR_with_CI.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/enriched_PFAMs_OR_with_CI.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/enriched_PFAMs_OR_with_CI.svg")
+
 
 plt.show()
 
-# Save filtered significant enrichment results
-significant_filtered.to_csv(
-    "C:/Users/hayat/Downloads/R_files/data/enriched_PFAMs_all_widespread_significant_with_CI.tsv",
-    sep="\t",
-    index=False
-)
+# # Save filtered significant enrichment results
+# significant_filtered.to_csv(
+#     "C:/Users/hayat/Downloads/R_files/data/enriched_PFAMs_all_widespread_significant_with_CI.tsv",
+#     sep="\t",
+#     index=False
+# )
 
 #foreground.to_csv("C:/Users/hayat/Downloads/R_files/data/filtered_foreground_eggnog_annotations.tsv", sep="\t", index=False)
 

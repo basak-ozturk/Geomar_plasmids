@@ -274,7 +274,7 @@ plt.xlabel("Sponge Genus")
 plt.xticks(rotation=45, ha="right")
 plt.tight_layout()
 
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_count_per_genus_final_plasmids.png", dpi=300, bbox_inches="tight")
 
 plt.show()
 
@@ -495,6 +495,8 @@ plt.legend()
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.3)
 plt.tight_layout()
 #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_vs_abundance_highlighted_final_plasmids.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_vs_abundance_highlighted_final_plasmids.svg")
+
 plt.show()
 
 # Distribution of top widespread and abundant plasmids across host genera
@@ -692,7 +694,9 @@ g.ax_col_dendrogram.legend(
 g.ax_heatmap.set_xlabel("Host Genus (with metagenome count)", fontsize=12)
 g.ax_heatmap.set_ylabel("Plasmid", fontsize=12)
 
-g.savefig("C:/Users/hayat/Downloads/R_files/graphs/top_10_percent_abundant_widespread_relative_presence_clustermap.png", dpi=300)
+#g.savefig("C:/Users/hayat/Downloads/R_files/graphs/top_10_percent_abundant_widespread_relative_presence_clustermap.png", dpi=300)
+g.savefig("C:/Users/hayat/Downloads/R_files/graphs/top_10_percent_abundant_widespread_relative_presence_clustermap.svg")
+
 plt.show()
 
 # Map metagenomes (columns) to their sponge genus
@@ -807,7 +811,9 @@ else:
 plt.text((x1 + x2) * 0.5, y + h + 0.05, p_text, ha='center', va='bottom', color=col)
 
 plt.tight_layout()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_per_hma_lma.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_per_hma_lma.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_per_hma_lma.svg")
+
 plt.show()
 
 # Calculate plasmid richness per metagenome (number of plasmids with RPKM ≥ 1)
@@ -884,7 +890,9 @@ else:
 
 plt.text((x1 + x2) * 0.5, y + h + 1, p_text, ha='center', va='bottom', color='k')
 
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.svg")
+
 plt.show()
 
 

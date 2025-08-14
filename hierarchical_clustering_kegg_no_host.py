@@ -37,7 +37,7 @@ cluster_labels = fcluster(linkage_matrix, t=cluster_cutoff, criterion="distance"
 binary_matrix_filtered["Cluster"] = cluster_labels
 
 # Save cluster assignments
-binary_matrix_filtered.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmid_clusters_hierarchical_100.csv")
+#binary_matrix_filtered.to_csv("C:/Users/hayat/Downloads/R_files/data/plasmid_clusters_hierarchical_100.csv")
 
 # Set Seaborn style
 sns.set_style("whitegrid")
@@ -109,12 +109,12 @@ cluster_mapping["Percentage"] = (cluster_mapping["Plasmid_Count"] / total_plasmi
 filtered_clusters = cluster_mapping[cluster_mapping["Plasmid_Count"] > 20]
 
 # Save filtered clusters
-filtered_clusters.to_csv(
-    "C:/Users/hayat/Downloads/R_files/data/plasmid_cluster_filtered_100_cl_26.csv", 
-    index=True,  
-    header=True,  
-    columns=["Plasmid_Count", "Percentage"]
-)
+# filtered_clusters.to_csv(
+#     "C:/Users/hayat/Downloads/R_files/data/plasmid_cluster_filtered_100_cl_26.csv", 
+#     index=True,  
+#     header=True,  
+#     columns=["Plasmid_Count", "Percentage"]
+# )
 
 print("\nFiltered clusters (more than 20 plasmids) saved to 'plasmid_cluster_filtered_100_cl_26.csv'.")
 
@@ -257,7 +257,9 @@ for cluster in unique_clusters:
         fontweight="bold"
     )
 
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/pathway_clustermap_with_clusters.png", dpi=300, bbox_inches="tight", pad_inches=0.1)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/pathway_clustermap_with_clusters.png", dpi=300, bbox_inches="tight", pad_inches=0.1)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/pathway_clustermap_with_clusters.svg")
+
 plt.show()
 
 # Save cluster assignments

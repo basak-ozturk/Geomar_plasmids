@@ -184,7 +184,9 @@ plt.title(r'PFAM Enrichment in Agelas Plasmids' + '\n' +
 
 plt.tight_layout()
 plt.legend()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/agelas_enriched_PFAMs_OR_with_CI_high_OR.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/agelas_enriched_PFAMs_OR_with_CI_high_OR.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/agelas_enriched_PFAMs_OR_with_CI_high_OR.svg")
+
 plt.show()
 
 # Rename columns for clarity
@@ -196,7 +198,7 @@ output_df = significant_filtered.rename(columns={
 })
 
 # Save to TSV
-output_df.to_csv("C:/Users/hayat/Downloads/R_files/data/significant_enriched_pfam_domains_agelas_high_OR.tsv", sep="\t", index=False)
+#output_df.to_csv("C:/Users/hayat/Downloads/R_files/data/significant_enriched_pfam_domains_agelas_high_OR.tsv", sep="\t", index=False)
 
 
 #foreground.to_csv("C:/Users/hayat/Downloads/R_files/data/filtered_foreground_eggnog_annotations.tsv", sep="\t", index=False)

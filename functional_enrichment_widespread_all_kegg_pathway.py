@@ -213,13 +213,15 @@ plt.title(r'Pathway Enrichment in Agelas Plasmids' + '\n' +
 
 plt.tight_layout()
 plt.legend()
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/agelas_enriched_pathways_OR_with_CI.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/agelas_enriched_pathways_OR_with_CI.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/agelas_enriched_pathways_OR_with_CI.svg")
+
 plt.show()
 
 
-# Save filtered significant enrichment results
-significant_filtered.to_csv(
-    "C:/Users/hayat/Downloads/R_files/data/enriched_KEGG_Pathways_Agelas.tsv",
-    sep="\t",
-    index=False
-)
+# # Save filtered significant enrichment results
+# significant_filtered.to_csv(
+#     "C:/Users/hayat/Downloads/R_files/data/enriched_KEGG_Pathways_Agelas.tsv",
+#     sep="\t",
+#     index=False
+# )

@@ -26,7 +26,7 @@ def analyze_fasta(fasta_file):
     # Plot histogram
     plt.figure(figsize=(10, 6))
     plt.hist(lengths, bins=50, edgecolor='black')
-    plt.title("Distribution of Sequence Lengths for All Putative Sponge Plasmids")
+    plt.title("Distribution of Sequence Lengths for Top Widespread and Abundant Plasmids")
     plt.xlabel("Sequence Length")
     plt.ylabel("Frequency")
     
@@ -36,7 +36,8 @@ def analyze_fasta(fasta_file):
     plt.axvline(median_length, color='b', linestyle='dashed', linewidth=2, label=f'Median: {median_length}')
     
     plt.legend()
-    plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/sequence_length_distribution_all_sponge_plas.png", dpi=300)
+    #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/sequence_length_distribution_all_sponge_plas.png", dpi=300)
+    plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/sequence_length_distribution_all_sponge_plas.svg")
     plt.close()
 
 analyze_fasta('C:/Users/hayat/Downloads/R_files/data/all_sponge_plasmids.fasta')

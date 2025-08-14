@@ -310,6 +310,6 @@ summary = (
 
 unified_forest_plot(
     results_df,
-    save_path="C:/Users/hayat/Downloads/R_files/graphs/unified_ko_forestplot.png"
+    save_path="C:/Users/hayat/Downloads/R_files/graphs/unified_ko_forestplot.svg"
 )
 
