@@ -256,9 +256,19 @@ for cluster in unique_clusters:
         color=cluster_color_map[cluster],
         fontweight="bold"
     )
+# Rasterize only the heatmap and cluster bar
+clustermap.ax_heatmap.collections[0].set_rasterized(True)
+cluster_bar_ax.images[0].set_rasterized(True)
+
+plt.savefig(
+    "C:/Users/hayat/Downloads/R_files/graphs/publication_figures/Figure_4/pathway_clustermap_with_clusters.svg",
+    dpi=300,
+    bbox_inches="tight",
+    pad_inches=0.1
+)
 
 #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/pathway_clustermap_with_clusters.png", dpi=300, bbox_inches="tight", pad_inches=0.1)
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/pathway_clustermap_with_clusters.svg")
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/publication_figures/Figure_4/pathway_clustermap_with_clusters.svg")
 
 plt.show()
 

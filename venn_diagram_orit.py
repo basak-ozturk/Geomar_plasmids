@@ -36,7 +36,7 @@ plt.title("Venn Diagram of PCUs with Plasmid Hallmarks, CONJscan hits, and r$\it
 
 # Save as SVG
 output_path = "C:/Users/hayat/Downloads/R_files/graphs/venn_diagram_orit_conjscan_hallmark.svg"
-plt.savefig(output_path, format="svg")
+#plt.savefig(output_path, format="svg")
 plt.show()
 plt.close()
 

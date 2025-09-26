@@ -19,7 +19,8 @@ v.get_label_by_id('10').set_text(str(only_imgpr))
 v.get_label_by_id('01').set_text(str(only_sponge))
 v.get_label_by_id('11').set_text(str(overlap))
 ax.set_title("IMG/PR vs Sponge Plasmids (Nucleotide)")
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/venn2_imgpr_sponge_not_scaled.svg")
+plt.show()
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/venn2_imgpr_sponge_not_scaled.svg")
 
 # === 3-circle Venn (Sponge vs IMG/PR vs PLSDB) ===
 subsets = (
@@ -38,6 +39,6 @@ for label, count in zip(['100', '010', '110', '001', '101', '011', '111'], subse
     if v3.get_label_by_id(label):
         v3.get_label_by_id(label).set_text(str(count))
 ax3.set_title("Sponge Plasmids vs IMG/PR vs PLSDB (Protein)")
-plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/venn3_sponge_imgpr_plsdb_not_scaled.svg")
-
-print("Saved: venn2_imgpr_sponge_not_scaled.svg and venn3_sponge_imgpr_plsdb_not_scaled.svg")
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/venn3_sponge_imgpr_plsdb_not_scaled.svg")
+plt.show()
+#print("Saved: venn2_imgpr_sponge_not_scaled.svg and venn3_sponge_imgpr_plsdb_not_scaled.svg")

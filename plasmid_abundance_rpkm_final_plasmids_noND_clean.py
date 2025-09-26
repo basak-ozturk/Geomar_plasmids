@@ -184,11 +184,13 @@ plt.axvline(x=presence_thresh, color='darkblue', linestyle='--', label='90th %il
 plt.yscale("log")
 plt.xlabel("Number of Metagenomes with RPKM ≥ 1")
 plt.ylabel("Total RPKM across Metagenomes (log scale)")
-plt.title(f"Plasmid Widespreadness vs. Abundance\n({len(top_both)} plasmids in top 10% both)")
+#plt.title(f"Plasmid Widespreadness vs. Abundance\n({len(top_both)} plasmids in top 10% both)")
 plt.legend()
 plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.3)
 plt.tight_layout()
-# plt.savefig(".../widespread_vs_abundance_highlighted.png", dpi=300)
+#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/publication_figures/widespread_vs_abundance_highlighted.png", dpi=300)
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/publication_figures/widespread_vs_abundance_highlighted_final_plasmids_Figure_2c.svg")
+
 plt.show()
 
 
@@ -286,7 +288,7 @@ g = sns.clustermap(
     col_colors=col_colors
 )
 
-plt.suptitle("Clustered Relative Presence of Top 10% Abundant & Widespread Plasmids\nAcross Host Genera (>1 metagenome with plasmid)", fontsize=18, y=1.05)
+#plt.suptitle("Clustered Relative Presence of Top 10% Abundant & Widespread Plasmids\nAcross Host Genera (>1 metagenome with plasmid)", fontsize=18, y=1.05)
 
 legend_handles = [Patch(color=color, label=label) for label, color in hma_lma_colors.items() if label != "N.D."]
 g.ax_col_dendrogram.legend(handles=legend_handles, title="Host Microbial Abundance", loc="center", bbox_to_anchor=(1.2, -3), ncol=3)
@@ -297,8 +299,12 @@ g.ax_heatmap.set_yticklabels([])
 g.ax_heatmap.set_xlabel("Host Genus (with metagenome count)", fontsize=12)
 g.ax_heatmap.set_ylabel("Plasmid", fontsize=12)
 
+g.cax.set_position([0.93, 0.2, 0.02, 0.3])  # [x, y, width, height]
+g.cax.yaxis.set_label_position("right")
+g.cax.yaxis.tick_right()
+
 # g.savefig(".../top_10_percent_abundant_widespread_relative_presence_clustermap.png", dpi=300)
-#g.savefig("C:/Users/hayat/Downloads/R_files/graphs/top_10_percent_abundant_widespread_relative_presence_clustermap.svg")
+g.savefig("C:/Users/hayat/Downloads/R_files/graphs/publication_figures/top_10_percent_abundant_widespread_relative_presence_clustermap_Figure_2d.svg")
 plt.show()
 
 # --------------------
@@ -356,7 +362,7 @@ for i, g in enumerate(order):
     plt.scatter(i, medians[g], color='red', marker='o', s=60, edgecolor='black', label='Median' if i == 0 else "", zorder=10)
 
 plt.yscale("log")
-plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
+#plt.title("Total Plasmid RPKM per Metagenome by Sponge Type (HMA vs LMA)")
 plt.ylabel("Total RPKM (log scale)")
 plt.xlabel("Sponge Type")
 plt.legend()
@@ -368,7 +374,7 @@ plt.plot([x1, x1, x2, x2], [y, y+0.2, y+0.2, y], lw=1.5, c='k')
 plt.text(0.5, y+0.25, "****" if p_value < 0.0001 else "***" if p_value < 0.001 else "**" if p_value < 0.01 else "*" if p_value < 0.05 else "ns", ha='center')
 
 # plt.savefig(".../plasmid_RPKM_per_hma_lma.png", dpi=300)
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_RPKM_per_hma_lma.svg")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/publication_figures/plasmid_RPKM_per_hma_lma_Figure_2a.svg")
 plt.show()
 
 # --------------------
@@ -425,7 +431,7 @@ for i, g in enumerate(order):
         zorder=10
     )
 
-plt.title("Plasmid Diversity per Metagenome by Sponge Type (HMA vs LMA)")
+#plt.title("Plasmid Diversity per Metagenome by Sponge Type (HMA vs LMA)")
 plt.ylabel("Plasmid Richness (RPKM ≥ 1)")
 plt.xlabel("Sponge Type")
 plt.legend()
@@ -450,7 +456,7 @@ else:
 plt.text((x1 + x2) * 0.5, y + h + 1, p_text, ha='center', va='bottom', color='k')
 
 plt.tight_layout()
-#plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/plasmid_diversity_per_hma_lma.svg")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/publication_figures/plasmid_diversity_per_hma_lma_figure_2b.svg")
 plt.show()
 
 
