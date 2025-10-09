@@ -27,17 +27,20 @@ with open(file3, "r") as f:
 plt.figure(figsize=(8, 8))
 venn = venn3(
     [set1, set2, set3],
-    set_labels=("Plasmid Hallmarks", r"$\it{oriT}$", "CONJscan"),
+    set_labels=("Plasmid Hallmark", r"$\it{oriT}$", "CONJscan"),
     set_colors=("#E63946", "#457B9D", "#2A9D8F"),  # nicer colors
-    alpha=0.6
+    alpha=1
 )
 
-plt.title("Venn Diagram of PCUs with Plasmid Hallmarks, CONJscan hits, and r$\it{oriT}$", fontsize=16, fontweight='bold')
+#plt.title("Venn Diagram of PCUs with Plasmid Hallmarks, CONJscan hits, and r$\it{oriT}$", fontsize=16, fontweight='bold')
 
-# Save as SVG
-output_path = "C:/Users/hayat/Downloads/R_files/graphs/venn_diagram_orit_conjscan_hallmark.svg"
-#plt.savefig(output_path, format="svg")
+
+
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/venn_diagram_orit_conjscan_hallmark.svg")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/venn_diagram_orit_conjscan_hallmark.pdf")
+plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/venn_diagram_orit_conjscan_hallmark.eps")
+
 plt.show()
 plt.close()
 
-print(f"Venn diagram saved to: {output_path}")
+

@@ -13,9 +13,9 @@ import seaborn as sns
 from statsmodels.stats.contingency_tables import Table2x2
 import numpy as np
 # Load list of plasmids
-Geodia_plasmid_file = "C:/Users/hayat/Downloads/R_files/data/plasmids_in_Agelas.tsv"
-Geodia_df = pd.read_csv(Geodia_plasmid_file, sep="\t")
-plasmids = set(Geodia_df.iloc[:, 0])  # First column assumed to be plasmid names
+Agelas_plasmid_file = "C:/Users/hayat/Downloads/R_files/data/plasmids_in_Agelas.tsv"
+Agelas_df = pd.read_csv(Agelas_plasmid_file, sep="\t")
+plasmids = set(Agelas_df.iloc[:, 0])  # First column assumed to be plasmid names
 
 
 # Find header line in eggNOG annotations

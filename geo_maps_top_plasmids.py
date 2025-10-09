@@ -43,6 +43,11 @@ for file_path in tsv_files:
     output_file = os.path.join(output_folder, f"{plasmid_name}_plasmid_map.html")
     fig.write_html(output_file)
     print(f"Saved map for {plasmid_name} to {output_file}")
+    # Save PNG
+    output_file_png = os.path.join(output_folder, f"{plasmid_name}_plasmid_map.png")
+    fig.write_image(output_file_png, format="png", scale=2)  # scale=2 makes it higher resolution
+    print(f"Saved PNG map for {plasmid_name} to {output_file_png}")
+
 
 # Combine all files into one DataFrame
 all_data = []
@@ -70,10 +75,15 @@ fig = px.scatter_geo(combined_df,
 # Increase symbol size manually (Plotly doesn't scale size well for geo)
 fig.update_traces(marker=dict(size=10, line=dict(width=0.5, color='black')))
 
-# Optional: adjust layout
+# Adjust layout
 fig.update_layout(title="Combined Plasmid Occurrence Map",
                   legend_title="Host Genus / Plasmid")
 
 # Save to HTML
 fig.write_html(output_file2)
-print(f"Combined map saved to {output_file2}")
+#print(f"Combined map saved to {output_file2}")
+
+
+output_file2_png = "C:/Users/hayat/Downloads/R_files/graphs/combined_plasmid_map.png"
+fig.write_image(output_file2_png, format="png", scale=2)
+print(f"Combined PNG map saved to {output_file2_png}")

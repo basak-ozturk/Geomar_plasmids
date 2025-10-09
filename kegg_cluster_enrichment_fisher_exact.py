@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 #import os
 import re
 from collections import defaultdict
-import seaborn as sns
+#import seaborn as sns
 
 
 
@@ -278,13 +278,68 @@ def unified_forest_plot(df, save_path):
     plt.show()
     plt.close()
 
+# Define numeric columns to round
+numeric_cols = ['OddsRatio', 'log2(OR)', 'CI_lower', 'CI_upper', 'P', 'AdjP']
+results_df[numeric_cols] = results_df[numeric_cols].round(2)
+
+# Filter for OddsRatio > 1
+results_df_filtered = results_df[results_df['OddsRatio'] > 1]
+
+# Columns to include (no Description)
+columns_for_table = ['Cluster', 'KO', 'OddsRatio', 'log2(OR)', 'CI_lower', 'CI_upper', 'AdjP']
+
+# Collect top 10 per cluster
+top10_list = []
+for cluster in sorted(results_df_filtered['Cluster'].unique()):
+    sub = results_df_filtered[results_df_filtered['Cluster'] == cluster].copy()
+    sub = sub.sort_values('OddsRatio', ascending=False).head(10)
+    top10_list.append(sub[columns_for_table])
+
+# Combine into a single DataFrame
+top10_combined = pd.concat(top10_list)
+
+# Generate a single LaTeX longtable
+latex_table_str = top10_combined.to_latex(
+    index=False,
+    caption="Top 10 enriched KOs per cluster (Odds Ratio > 1)",
+    label="tab:kegg_enrichment",
+    float_format="%.2f",
+    longtable=True
+)
+
+# Print the LaTeX code
+print(latex_table_str)
 
 
-for cluster in cluster_plasmids:
-    forest_plot(results_df, cluster)
 
+# Prepare a DataFrame to collect top 10 per cluster
+top10_per_cluster = pd.DataFrame()
+
+# Iterate over clusters
+for cluster in sorted(results_df_filtered['Cluster'].unique()):
+    sub = results_df_filtered[results_df_filtered['Cluster'] == cluster].copy()
     
-results_df.to_csv("ko_enrichment_with_CI.tsv", sep='\t', index=False)
+    # Sort by OddsRatio descending
+    sub = sub.sort_values('OddsRatio', ascending=False)
+    
+    # Take top 10
+    sub_top = sub.head(10)
+    
+    # Append to the combined DataFrame
+    top10_per_cluster = pd.concat([top10_per_cluster, sub_top[columns_for_table]])
+
+# Save to CSV
+top10_per_cluster.to_csv(
+    "C:/Users/hayat/Downloads/R_files/data/ko_enrichment_top10_per_cluster.csv",
+    sep='\t',
+    index=False
+)
+
+print("CSV saved with top 10 KOs per cluster.")
+
+
+
+
 
 summary = (
     results_df[results_df['AdjP'] < 0.05]
@@ -308,8 +363,8 @@ summary = (
 #     #save_path="C:/Users/hayat/Downloads/R_files/graphs/combined_ko_forestplot_panel.png"
 # )
 
-unified_forest_plot(
-    results_df,
-    save_path="C:/Users/hayat/Downloads/R_files/graphs/unified_ko_forestplot.svg"
-)
+#unified_forest_plot(
+ #   results_df,
+  #  save_path="C:/Users/hayat/Downloads/R_files/graphs/unified_ko_forestplot.svg"
+#)
 

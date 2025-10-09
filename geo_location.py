@@ -53,23 +53,23 @@ fig = px.scatter_geo(final_df, lat='Latitude', lon='Longitude',
                      projection='natural earth')
 fig.update_traces(marker=dict(size=10, line=dict(width=0.5, color='black')))
 fig.update_layout(title="Global Occurrence Map for the Top Widespread and Abundant Plasmids", legend_title="Host Genus")
-fig.write_html("C:/Users/hayat/Downloads/R_files/graphs/plasmid_map.html")
-
+#fig.write_html("C:/Users/hayat/Downloads/R_files/graphs/plasmid_map.html")
+fig.write_image("C:/Users/hayat/Downloads/R_files/graphs/plasmid_map.png", format="png", scale=2)
 fig.show()
 
 
 
-coords = final_df[['Latitude', 'Longitude']].values
+# coords = final_df[['Latitude', 'Longitude']].values
 
-# Calculate pairwise distance matrix (in km)
-dist_matrix = np.zeros((len(coords), len(coords)))
-for i in range(len(coords)):
-    for j in range(len(coords)):
-        dist_matrix[i,j] = great_circle(coords[i], coords[j]).km
+# # Calculate pairwise distance matrix (in km)
+# dist_matrix = np.zeros((len(coords), len(coords)))
+# for i in range(len(coords)):
+#     for j in range(len(coords)):
+#         dist_matrix[i,j] = great_circle(coords[i], coords[j]).km
 
-# Cluster plasmids by location (e.g., 3 clusters)
-cluster = AgglomerativeClustering(n_clusters=10, metric='precomputed', linkage='complete')
-labels = cluster.fit_predict(dist_matrix)
+# # Cluster plasmids by location (e.g., 3 clusters)
+# cluster = AgglomerativeClustering(n_clusters=10, metric='precomputed', linkage='complete')
+# labels = cluster.fit_predict(dist_matrix)
 
-final_df['geo_cluster'] = labels
-final_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_widespread_plasmid_metadata.tsv", sep="\t", index=False)
+# final_df['geo_cluster'] = labels
+# final_df.to_csv("C:/Users/hayat/Downloads/R_files/data/top_widespread_plasmid_metadata.tsv", sep="\t", index=False)

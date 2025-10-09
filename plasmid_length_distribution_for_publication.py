@@ -70,7 +70,7 @@ def analyze_fasta_kde(fasta_file):
 
     plt.legend()
     plt.show()
-    plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/sequence_length_density.svg")
+    #plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/sequence_length_density.svg")
     plt.close()
 
 analyze_fasta_kde('C:/Users/hayat/Downloads/R_files/data/all_sponge_plasmids.fasta')
@@ -98,11 +98,12 @@ def analyze_fasta_kde_log(fasta_file):
     plt.axvline(median_length, color='b', linestyle='dashed', linewidth=2, label=f'Median: {median_length}')
 
     plt.legend()
+    
+    plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_sequence_length_density_log.pdf")
     plt.show()
-    plt.savefig("C:/Users/hayat/Downloads/R_files/graphs/widespread_sequence_length_density_log.svg")
     plt.close()
 
-analyze_fasta_kde_log('C:/Users/hayat/Downloads/R_files/data/all_sponge_plasmids.fasta')
+#analyze_fasta_kde_log('C:/Users/hayat/Downloads/R_files/data/all_sponge_plasmids.fasta')
 
 analyze_fasta_kde_log('C:/Users/hayat/Downloads/R_files/data/top_abundant_and_widespread_final_plasmid.fasta')
 
